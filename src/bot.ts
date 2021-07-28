@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 import path from "path";
-import Client from "./strutures/Client";
+import Client from "./structures/Client";
 import { Intents } from "discord.js";
 import mongoose from "mongoose";
 
