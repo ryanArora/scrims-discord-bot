@@ -1,6 +1,6 @@
-import Client from "../strutures/Client";
+import Client from "../structures/Client";
 import { Message } from "discord.js";
-import Event from "../strutures/Event";
+import Event from "../structures/Event";
 import GuildSettings, { IGuildSettings } from "../schemas/GuildSettings";
 
 const message = async (client: Client, message: Message) => {
