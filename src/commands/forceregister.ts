@@ -4,6 +4,16 @@ import { GuildMember, Util } from "discord.js";
 import getPlayerUpdateNickname from "../util/getPlayerUpdateNickname";
 
 const run: RunCallback = async (client, message, args, settings) => {
+  if (!message.member) return;
+
+  const isScorer = settings?.scorerRole && message.member.roles.cache.some((r) => r.id === settings.scorerRole;
+  const isAdmin = message.member.hasPermission("ADMINISTRATOR")
+
+  if (!isScorer && !isAdmin) {
+    message.channel.send("You need to be a scorer to run this command!").catch(() => {});
+    return;
+  }
+
   const name = args[0];
   if (!name) {
     message.channel.send("You need to have your username as the first argument").catch(() => {
