@@ -6,6 +6,7 @@ import { IGuildSettings } from "../schemas/GuildSettings";
 const message = async (client: Client, message: Message) => {
   if (message.author.bot) return;
   if (!message.content.startsWith(client.prefix)) return;
+  if (!message.guild) return;
 
   let settings: IGuildSettings | null = null;
   if (message.guild) settings = await client.getGuildSettings(message.guild.id);

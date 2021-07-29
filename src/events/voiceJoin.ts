@@ -1,7 +1,8 @@
 import Client from "../structures/Client";
-import { VoiceState } from "discord.js";
+import { MessageEmbed, VoiceState } from "discord.js";
 import Event from "../structures/Event";
 import Game from "../schemas/Game";
+import Player from "../schemas/Player";
 
 const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceState) => {
   // executed on voicestatechange
@@ -54,35 +55,72 @@ const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceSt
     return;
   }
 
-  text.send("Placeholder for team picking embed").catch((err) => {
-    console.log("Error sending start message to game", gameCount);
-  });
-
   const voice = await newState.guild.channels.create(`Game #${gameCount} - Picking Teams`, { type: "voice", parent: settings.gamesCategory });
   if (!voice) {
     console.log("Error creating voicechannel for game", gameCount);
     return;
   }
 
-  const players = channel.members.first(playerLimit);
-  const playerIds = players.map((p) => p.id);
+  const members = channel.members.first(playerLimit);
+  const memberIds = members.map((p) => p.id);
 
-  for (const player of players) {
-    player.voice.setChannel(voice.id).catch(() => {
-      console.log("Error moving player", player.user.tag, "to voicechannel for game", gameCount);
+  Player.find({ discordId: { $in: memberIds } })
+    .then((players) => {
+      if (players.length !== playerLimit) {
+        console.log("Abort game");
+      }
+
+      const sorted = players.sort((a, b) => (a.elo < b.elo ? 1 : -1)); // highest elo goes to the top
+      const possibleCaptains = sorted.slice(0, Math.floor(playerLimit / 2)); // top 50% of elo can be captains
+      const shuffled = possibleCaptains.sort((a, b) => 0.5 - Math.random()); // shuffle
+
+      const cap1 = shuffled[0];
+      const cap2 = shuffled[1];
+
+      if (!cap1 || !cap2) {
+        console.log("A captain is missing?");
+        return;
+      }
+
+      let remainingPlayersStr = "";
+
+      const i = sorted.indexOf(cap1);
+      const j = sorted.indexOf(cap2);
+      const remaining = sorted.splice(i, 1).splice(j, 1);
+
+      for (const player of remaining) remainingPlayersStr += `<@${player.discordId}>\n`;
+      remainingPlayersStr = remainingPlayersStr.slice(0, -1);
+
+      const embed = new MessageEmbed();
+      embed.setTitle(`Game #${gameCount} - Picking Teams`);
+      embed.addField("Team 1", `Captain: <@${cap1.discordId}>`);
+      embed.addField("Team 2", `Captain: <@${cap2.discordId}>`);
+      embed.addField("Remaining", remainingPlayersStr);
+
+      text.send(`Captains have been picked. Use the \`pick\` or \`p\` command to choose your players.\nCaptain 1: <@${cap1.discordId}>\nCaptian 2: <@${cap2.discordId}>`, { embed }).catch(() => {});
+
+      const game = new Game({
+        gameId: gameCount,
+        players: memberIds,
+        textChannel: text.id,
+        voiceChannel: voice.id,
+        team1: [cap1], // first captain
+        team2: [cap2], // second captain
+      });
+
+      game.save().catch(() => {
+        console.log("Error saving game");
+      });
+    })
+    .catch((err) => {
+      console.log("Error fetching players", err);
+    });
+
+  for (const member of members) {
+    member.voice.setChannel(voice.id).catch(() => {
+      console.log("Error moving player", member.user.tag, "to voicechannel for game", gameCount);
     });
   }
-
-  const game = new Game({
-    gameId: gameCount,
-    players: playerIds,
-    textChannel: text.id,
-    voiceChannel: voice.id,
-  });
-
-  game.save().catch(() => {
-    console.log("Error saving game");
-  });
 };
 
 const VoiceJoinEvent: Event = {
