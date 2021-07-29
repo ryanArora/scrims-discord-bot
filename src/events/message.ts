@@ -1,20 +1,14 @@
 import Client from "../structures/Client";
 import { Message } from "discord.js";
 import Event from "../structures/Event";
-import GuildSettings, { IGuildSettings } from "../schemas/GuildSettings";
+import { IGuildSettings } from "../schemas/GuildSettings";
 
 const message = async (client: Client, message: Message) => {
   if (message.author.bot) return;
   if (!message.content.startsWith(client.prefix)) return;
 
   let settings: IGuildSettings | null = null;
-  if (message.guild) {
-    settings = await GuildSettings.findOne({ guildId: message.guild.id });
-    if (settings === null) {
-      settings = new GuildSettings({ guildId: message.guild.id });
-      await settings.save();
-    }
-  }
+  if (message.guild) settings = await client.getGuildSettings(message.guild.id);
 
   const args: string[] = message.content.slice(client.prefix.length).trim().split(/ +/g);
   const commandName = args.shift()!.toLowerCase();

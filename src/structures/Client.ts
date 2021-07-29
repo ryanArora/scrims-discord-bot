@@ -3,6 +3,7 @@ import path from "path";
 import Discord from "discord.js";
 import Command from "./Command";
 import Event from "./Event";
+import GuildSettings, { IGuildSettings } from "../schemas/GuildSettings";
 
 export default class Client extends Discord.Client {
   commands = new Discord.Collection<Command["name"], Command>();
@@ -38,5 +39,15 @@ export default class Client extends Discord.Client {
       // bind event to EventEmitter
       this.on(event.name, event.run.bind(null, this));
     }
+  }
+
+  async getGuildSettings(guildId: string) {
+    let settings: IGuildSettings | null = await GuildSettings.findOne({ guildId });
+    if (settings === null) {
+      settings = new GuildSettings({ guildId });
+      await settings.save();
+    }
+
+    return settings;
   }
 }
