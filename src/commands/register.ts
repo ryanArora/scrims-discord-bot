@@ -4,6 +4,8 @@ import { Util } from "discord.js";
 import getPlayerUpdateNickname from "../util/getPlayerUpdateNickname";
 
 const run: RunCallback = async (client, message, args, settings) => {
+  if (!message.guild || !message.member || !settings) return;
+
   const name = args[0];
   if (!name) {
     message.channel.send("You need to have your username as the first argument").catch(() => {

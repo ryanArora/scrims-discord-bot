@@ -2,14 +2,12 @@ import Command, { RunCallback } from "../structures/Command";
 import axios from "axios";
 import { GuildMember, Util } from "discord.js";
 import getPlayerUpdateNickname from "../util/getPlayerUpdateNickname";
+import canScore from "../util/canScore";
 
 const run: RunCallback = async (client, message, args, settings) => {
-  if (!message.member) return;
+  if (!message.guild || !message.member || !settings) return;
 
-  const isScorer = settings?.scorerRole && message.member.roles.cache.some((r) => r.id === settings.scorerRole;
-  const isAdmin = message.member.hasPermission("ADMINISTRATOR")
-
-  if (!isScorer && !isAdmin) {
+  if (!canScore(message.member, settings.scorerRole)) {
     message.channel.send("You need to be a scorer to run this command!").catch(() => {});
     return;
   }

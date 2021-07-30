@@ -19,7 +19,7 @@ const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceSt
   }
 
   if (!settings.queue2 || !settings.queue3 || !settings.queue4 || !settings.gamesCategory) {
-    console.log("Settings not configured in guild", newState.guild.id);
+    console.log("Queue settings not configured in guild", newState.guild.id);
     return;
   }
 
@@ -67,12 +67,13 @@ const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceSt
   Player.find({ discordId: { $in: memberIds } })
     .then((players) => {
       if (players.length !== playerLimit) {
-        console.log("Abort game");
+        console.log("Someone hasn't registered");
+        return;
       }
 
-      const sorted = players.sort((a, b) => (a.elo < b.elo ? 1 : -1)); // highest elo goes to the top
+      const sorted = [...players].sort((a, b) => (a.elo < b.elo ? 1 : -1)); // highest elo goes to the top
       const possibleCaptains = sorted.slice(0, Math.floor(playerLimit / 2)); // top 50% of elo can be captains
-      const shuffled = possibleCaptains.sort((a, b) => 0.5 - Math.random()); // shuffle
+      const shuffled = [...possibleCaptains].sort((a, b) => 0.5 - Math.random()); // shuffle
 
       const cap1 = shuffled[0];
       const cap2 = shuffled[1];
@@ -82,20 +83,23 @@ const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceSt
         return;
       }
 
-      let remainingPlayersStr = "";
+      let remaining = [...sorted];
+      const i = remaining.indexOf(cap1);
+      remaining.splice(i, 1);
+      const j = remaining.indexOf(cap2);
+      remaining.splice(j, 1);
 
-      const i = sorted.indexOf(cap1);
-      const j = sorted.indexOf(cap2);
-      const remaining = sorted.splice(i, 1).splice(j, 1);
-
-      for (const player of remaining) remainingPlayersStr += `<@${player.discordId}>\n`;
-      remainingPlayersStr = remainingPlayersStr.slice(0, -1);
+      let remainingStr = "";
+      for (const player of remaining) remainingStr += `<@${player.discordId}>\n`;
+      remainingStr = remainingStr.slice(0, -1);
 
       const embed = new MessageEmbed();
       embed.setTitle(`Game #${gameCount} - Picking Teams`);
       embed.addField("Team 1", `Captain: <@${cap1.discordId}>`);
       embed.addField("Team 2", `Captain: <@${cap2.discordId}>`);
-      embed.addField("Remaining", remainingPlayersStr);
+      embed.addField("Remaining", remainingStr);
+
+      if (!remainingStr) remainingStr = "lol";
 
       text.send(`Captains have been picked. Use the \`pick\` or \`p\` command to choose your players.\nCaptain 1: <@${cap1.discordId}>\nCaptian 2: <@${cap2.discordId}>`, { embed }).catch(() => {});
 
@@ -104,8 +108,8 @@ const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceSt
         players: memberIds,
         textChannel: text.id,
         voiceChannel: voice.id,
-        team1: [cap1], // first captain
-        team2: [cap2], // second captain
+        team1: [cap1.discordId], // first captain
+        team2: [cap2.discordId], // second captain
       });
 
       game.save().catch(() => {
