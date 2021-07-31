@@ -1,6 +1,13 @@
 import { Schema, model, Document } from "mongoose";
 import { GuildMember, TextChannel, VoiceChannel } from "discord.js";
 
+export enum EGameState {
+  PICKING,
+  PLAYING,
+  SCORING,
+  FINISHED,
+}
+
 export interface IGame extends Document {
   gameId: number;
   players: GuildMember["id"][];
@@ -11,6 +18,8 @@ export interface IGame extends Document {
   team1: GuildMember["id"][];
   team2: GuildMember["id"][];
   pickNumber: number;
+  state: EGameState;
+  voided: boolean;
 }
 
 const GameSchema = new Schema({
@@ -23,6 +32,8 @@ const GameSchema = new Schema({
   team1: { type: [String] },
   team2: { type: [String] },
   pickNumber: { type: Number },
+  state: { type: Number, enum: Object.values(EGameState) },
+  voided: { type: Boolean },
 });
 
 export default model<IGame>("Games", GameSchema);

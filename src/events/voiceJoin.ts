@@ -1,7 +1,7 @@
 import Client from "../structures/Client";
 import { MessageEmbed, OverwriteResolvable, VoiceState } from "discord.js";
 import Event from "../structures/Event";
-import Game from "../schemas/Game";
+import Game, { EGameState } from "../schemas/Game";
 import Player from "../schemas/Player";
 import mentionsStr from "../util/mentionsStr";
 
@@ -135,6 +135,8 @@ const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceSt
         team1: [cap1.discordId], // first captain
         team2: [cap2.discordId], // second captain
         pickNumber: 0,
+        state: EGameState.PICKING,
+        voided: false,
       });
 
       game.save().catch(() => {

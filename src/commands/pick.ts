@@ -1,5 +1,5 @@
 import Command, { RunCallback } from "../structures/Command";
-import Game from "../schemas/Game";
+import Game, { EGameState } from "../schemas/Game";
 import { MessageEmbed } from "discord.js";
 import mentionsStr from "../util/mentionsStr";
 import getPicksAmount from "../util/getPicksAmount";
@@ -12,6 +12,11 @@ const run: RunCallback = async (client, message, args, settings) => {
   const game = await Game.findOne({ textChannel: message.channel.id });
   if (!game) {
     message.channel.send("You're not in an active game channel!");
+    return;
+  }
+
+  if (game.state !== EGameState.PICKING) {
+    message.channel.send("The game isn't in the picking phase!");
     return;
   }
 
@@ -80,6 +85,7 @@ const run: RunCallback = async (client, message, args, settings) => {
             if (!message.channel) return;
 
             game.team2VoiceChannel = voice.id;
+            game.state = EGameState.PLAYING;
 
             game.save().catch(console.log);
 

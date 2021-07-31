@@ -1,6 +1,6 @@
 import Command, { RunCallback } from "../structures/Command";
-import { MessageEmbed, VoiceChannel } from "discord.js";
-import Game from "../schemas/Game";
+import { MessageEmbed, OverwriteResolvable, VoiceChannel } from "discord.js";
+import Game, { EGameState } from "../schemas/Game";
 import dragPlayers from "../util/dragPlayers";
 import mentionsStr from "../util/mentionsStr";
 import getLastUrlRoute from "../util/getLastUrlRoute";
@@ -12,6 +12,20 @@ const run: RunCallback = async (client, message, args, settings) => {
   const game = await Game.findOne({ textChannel: message.channel.id });
   if (!game) {
     message.channel.send("You're not in an active game channel!").catch(() => {});
+    return;
+  }
+
+  if (game.state === EGameState.PICKING) {
+    message.channel.send("You can't score the game before the teams have been picked!");
+    return;
+  } else if (game.state === EGameState.FINISHED) {
+    let msg = "The game has already been ";
+    if (game.voided) {
+      msg += "voided!";
+    } else {
+      msg += "scored!";
+    }
+    message.channel.send(msg).catch(() => {});
     return;
   }
 
@@ -39,8 +53,34 @@ const run: RunCallback = async (client, message, args, settings) => {
         .send({ embed })
         .then(() => {
           message.channel.send("Scoring request submitted!");
+          game.state = EGameState.SCORING;
+          game.save().catch(console.log);
         })
         .catch(() => {});
+  }
+
+  const text = message.guild.channels.cache.get(game.textChannel);
+  if (text) {
+    const perms: OverwriteResolvable[] = [
+      {
+        id: message.guild.id,
+        deny: ["VIEW_CHANNEL"],
+      },
+      {
+        id: settings.scorerRole,
+        allow: ["VIEW_CHANNEL"],
+      },
+    ];
+
+    for (const id of game.players) {
+      perms.push({
+        id,
+        deny: ["SEND_MESSAGES"],
+        allow: ["VIEW_CHANNEL"],
+      });
+    }
+
+    text.overwritePermissions(perms);
   }
 
   setTimeout(async () => {
@@ -50,7 +90,6 @@ const run: RunCallback = async (client, message, args, settings) => {
       await dragPlayers(waiting as VoiceChannel, game.players);
     }
 
-    const text = message.guild.channels.cache.get(game.textChannel);
     if (text) {
       text
         .overwritePermissions([
