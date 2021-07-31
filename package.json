@@ -2,10 +2,11 @@
   "name": "ranked-bedwars",
   "private": true,
   "scripts": {
-    "build": "yarn clean && tsc",
+    "build": "tsc",
     "clean": "rimraf ./build",
     "start": "node build/bot.js",
-    "prod": "yarn build && yarn start"
+    "prod": "yarn clean && yarn build && yarn start",
+    "dev": "yarn build && yarn start"
   },
   "devDependencies": {
     "rimraf": "^3.0.2",

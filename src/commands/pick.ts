@@ -54,7 +54,6 @@ const run: RunCallback = async (client, message, args, settings) => {
 
   // remove the picked users from the remaining players
   for (const u of users) remaining.splice(remaining.indexOf(u.id), 1);
-  game.save().catch(console.log);
 
   const embed = new MessageEmbed();
   let msg = "";
@@ -70,20 +69,37 @@ const run: RunCallback = async (client, message, args, settings) => {
 
     message.guild.channels
       .create(`Game #${game.gameId} - Team 1`, { type: "voice", parent: settings.gamesCategory })
-      .then((voice) => {
+      .then(async (voice) => {
         if (!message.guild) return;
+
+        game.team1VoiceChannel = voice.id;
 
         message.guild.channels
           .create(`Game #${game.gameId} - Team 2`, { type: "voice", parent: settings.gamesCategory })
-          .then((voice) => {
+          .then(async (voice) => {
             if (!message.channel) return;
+
+            game.team2VoiceChannel = voice.id;
+
+            game.save().catch(console.log);
+
             dragPlayers(voice, game.team2, message.channel);
           })
           .catch((err) => {
             message.channel.send("Error creating team voice channel for team 1").catch(() => {});
           });
 
-        dragPlayers(voice, game.team1, message.channel);
+        await dragPlayers(voice, game.team1, message.channel);
+
+        setTimeout(() => {
+          if (!message.guild) return;
+          const oldVoice = message.guild.channels.cache.get(game.teamPickingVoiceChannel);
+          if (!oldVoice) return;
+
+          oldVoice.delete().catch(() => {
+            message.channel.send("Error deleting team picking channel").catch(() => {});
+          });
+        }, 2000);
       })
       .catch((err) => {
         message.channel.send("Error creating team voice channel for team 1").catch(() => {});
@@ -102,6 +118,8 @@ const run: RunCallback = async (client, message, args, settings) => {
     embed.setTitle(`Game #${game.gameId} - Picking Teams`);
     embed.addField("Remaining Players", mentionsStr(remaining, "\n"));
     msg = `<@${team1Picked ? game.team2[0] : game.team1[0]}> can select **${picksNext}** player${picksNext > 1 ? "s" : ""} for the next pick.`;
+
+    game.save().catch(console.log);
   }
 
   message.channel.send(msg, { embed }).catch(() => {});

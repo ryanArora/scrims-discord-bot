@@ -4,8 +4,10 @@ import { GuildMember, TextChannel, VoiceChannel } from "discord.js";
 export interface IGame extends Document {
   gameId: number;
   players: GuildMember["id"][];
-  textChanel: TextChannel["id"];
-  voiceChannel: VoiceChannel["id"];
+  textChannel: TextChannel["id"];
+  teamPickingVoiceChannel: VoiceChannel["id"];
+  team1VoiceChannel: VoiceChannel["id"];
+  team2VoiceChannel: VoiceChannel["id"];
   team1: GuildMember["id"][];
   team2: GuildMember["id"][];
   pickNumber: number;
@@ -15,7 +17,9 @@ const GameSchema = new Schema({
   gameId: { type: Number, requried: true, index: true, unique: true },
   players: { type: [String] },
   textChannel: { type: String, index: true },
-  voiceChannel: { type: String },
+  teamPickingVoiceChannel: { type: String },
+  team1VoiceChannel: { type: String },
+  team2VoiceChannel: { type: String },
   team1: { type: [String] },
   team2: { type: [String] },
   pickNumber: { type: Number },

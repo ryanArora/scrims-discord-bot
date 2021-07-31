@@ -1,8 +1,9 @@
 import Client from "../structures/Client";
-import { MessageEmbed, VoiceState } from "discord.js";
+import { MessageEmbed, OverwriteResolvable, VoiceState } from "discord.js";
 import Event from "../structures/Event";
 import Game from "../schemas/Game";
 import Player from "../schemas/Player";
+import mentionsStr from "../util/mentionsStr";
 
 const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceState) => {
   // executed on voicestatechange
@@ -49,7 +50,23 @@ const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceSt
   }
   gameCount++;
 
-  const text = await newState.guild.channels.create(`game-#${gameCount}`, { type: "text", parent: settings.gamesCategory });
+  const members = channel.members.first(playerLimit);
+  const memberIds = members.map((p) => p.id);
+
+  const permissionOverwrites: OverwriteResolvable[] = [
+    {
+      id: newState.guild.roles.everyone.id,
+      deny: ["VIEW_CHANNEL"],
+    },
+    {
+      id: settings.scorerRole,
+      allow: ["VIEW_CHANNEL"],
+    },
+  ];
+
+  for (const id of memberIds) permissionOverwrites.push({ id, allow: ["VIEW_CHANNEL"] });
+
+  const text = await newState.guild.channels.create(`game-#${gameCount}`, { type: "text", parent: settings.gamesCategory, permissionOverwrites });
   if (!text) {
     console.log("Error creating textchannel for game", gameCount);
     return;
@@ -61,13 +78,12 @@ const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceSt
     return;
   }
 
-  const members = channel.members.first(playerLimit);
-  const memberIds = members.map((p) => p.id);
-
   Player.find({ discordId: { $in: memberIds } })
     .then((players) => {
       if (players.length !== playerLimit) {
-        console.log("Someone hasn't registered");
+        // FEATURE:
+        // In the future, don't allow this to happen
+        text.send("Someone hasn't registered, please void the game").catch(() => {});
         return;
       }
 
@@ -99,15 +115,23 @@ const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceSt
       embed.addField("Team 2", `Captain: <@${cap2.discordId}>`);
       embed.addField("Remaining", remainingStr);
 
-      if (!remainingStr) remainingStr = "lol";
+      if (!remainingStr) remainingStr = "null";
 
-      text.send(`Captains have been picked. Use the \`pick\` or \`p\` command to choose your players.\nCaptain 1: <@${cap1.discordId}>\nCaptian 2: <@${cap2.discordId}>`, { embed }).catch(() => {});
+      let msg = "Captains have been picked. Use the `pick` or `p` command to choose your players.\n";
+      msg += `Captain 1: <@${cap1.discordId}>\n`;
+      msg += `Captain 2: <@${cap2.discordId}>\n`;
+      msg += mentionsStr(
+        remaining.map((p) => p.discordId),
+        " "
+      );
+
+      text.send(msg, { embed }).catch(() => {});
 
       const game = new Game({
         gameId: gameCount,
         players: memberIds,
         textChannel: text.id,
-        voiceChannel: voice.id,
+        teamPickingVoiceChannel: voice.id,
         team1: [cap1.discordId], // first captain
         team2: [cap2.discordId], // second captain
         pickNumber: 0,

@@ -13,8 +13,6 @@ const run: RunCallback = async (client, message, args, settings) => {
   message.guild.channels.cache.forEach((c) => {
     if (c.name.startsWith("game-") || c.name.startsWith("Game #")) c.delete().catch(console.log);
   });
-
-  message.channel.send("Deleting temporary channels").catch(() => {});
 };
 
 const DeleteChannelsCommand: Command = {
