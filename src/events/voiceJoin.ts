@@ -110,6 +110,7 @@ const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceSt
         voiceChannel: voice.id,
         team1: [cap1.discordId], // first captain
         team2: [cap2.discordId], // second captain
+        pickNumber: 0,
       });
 
       game.save().catch(() => {

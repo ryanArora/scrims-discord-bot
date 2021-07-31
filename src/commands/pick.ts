@@ -2,27 +2,28 @@ import Command, { RunCallback } from "../structures/Command";
 import Game from "../schemas/Game";
 import { MessageEmbed } from "discord.js";
 import mentionsStr from "../util/mentionsStr";
+import getPicksAmount from "../util/getPicksAmount";
+import dragPlayers from "../util/dragPlayers";
 
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member || !settings) return;
+  if (!settings.gamesCategory) return;
 
   const game = await Game.findOne({ textChannel: message.channel.id });
   if (!game) {
-    message.channel.send("You're not in an active game channel");
+    message.channel.send("You're not in an active game channel!");
     return;
   }
 
-  const remaining = game.players.filter((x) => game.team1.concat(game.team2).indexOf(x) === -1);
-  const playersLeft = remaining.length;
-  const playerCount = game.players.length;
-
-  // 1-2-1 for 3v3, 1-2-2-1 for 4v4
-  let picks = 1;
-  if (playersLeft === 5 && playerCount === 8) {
-    picks = 2;
-  } else if (playersLeft === 3 && (playerCount === 8 || playerCount === 6)) {
-    picks = 2;
+  let team1Picked = !(game.pickNumber % 2);
+  if ((team1Picked && game.team1[0] !== message.author.id) || (!team1Picked && game.team2[0] !== message.author.id)) {
+    message.channel.send("It's not your turn to pick!").catch(() => {});
+    return;
   }
+
+  let picks = getPicksAmount(game.players.length, game.pickNumber);
+  game.pickNumber++;
+  let picksNext = getPicksAmount(game.players.length, game.pickNumber);
 
   const users = message.mentions.users.first(picks);
 
@@ -32,52 +33,75 @@ const run: RunCallback = async (client, message, args, settings) => {
     return;
   }
 
+  const remaining = game.players.filter((x) => game.team1.concat(game.team2).indexOf(x) === -1);
+
   // if user picked someone not in queue
   if (!users.every((u) => remaining.includes(u.id))) {
-    message.channel.send("A user you selected is not in the queue").catch(() => {});
+    message.channel.send("You can't pick that player!").catch(() => {});
     return;
   }
 
+  // valid pick
+
   const userIds = users.map((u) => u.id);
 
-  // when team1 has less more people, its team2's pick, otherwise its team1's
-  if (game.team1.length > game.team2.length) {
-    game.team2 = game.team2.concat(userIds);
-  } else {
+  // add users to their team
+  if (team1Picked) {
     game.team1 = game.team1.concat(userIds);
+  } else {
+    game.team2 = game.team2.concat(userIds);
   }
 
   // remove the picked users from the remaining players
   for (const u of users) remaining.splice(remaining.indexOf(u.id), 1);
-
   game.save().catch(console.log);
 
   const embed = new MessageEmbed();
   let msg = "";
 
   if (remaining.length === 1) {
-    embed.setTitle(`Game #${game.gameId} - Picking Teams`);
+    embed.setTitle(`Game #${game.gameId} - Start Game`);
 
     if (game.team1.length > game.team2.length) {
       game.team2 = game.team2.concat(remaining);
     } else {
       game.team1 = game.team1.concat(remaining);
     }
+
+    message.guild.channels
+      .create(`Game #${game.gameId} - Team 1`, { type: "voice", parent: settings.gamesCategory })
+      .then((voice) => {
+        if (!message.guild) return;
+
+        message.guild.channels
+          .create(`Game #${game.gameId} - Team 2`, { type: "voice", parent: settings.gamesCategory })
+          .then((voice) => {
+            if (!message.channel) return;
+            dragPlayers(voice, game.team2, message.channel);
+          })
+          .catch((err) => {
+            message.channel.send("Error creating team voice channel for team 1").catch(() => {});
+          });
+
+        dragPlayers(voice, game.team1, message.channel);
+      })
+      .catch((err) => {
+        message.channel.send("Error creating team voice channel for team 1").catch(() => {});
+      });
   }
 
   let team1Str = `Captain: <@${game.team1[0]}>`;
   if (game.team1.length > 1) team1Str += `\nPlayers: ${mentionsStr(game.team1.slice(1), "\n")}`;
+  embed.addField("Team 1", team1Str);
 
   let team2Str = `Captain: <@${game.team2[0]}>`;
   if (game.team2.length > 1) team2Str += `\nPlayers: ${mentionsStr(game.team2.slice(1), "\n")}`;
-
-  embed.addField("Team 1", team1Str);
   embed.addField("Team 2", team2Str);
 
   if (remaining.length > 1) {
     embed.setTitle(`Game #${game.gameId} - Picking Teams`);
     embed.addField("Remaining Players", mentionsStr(remaining, "\n"));
-    msg = `<@${game.team1.length > game.team2.length ? game.team2[0] : game.team1[0]}> can select **${picks}** player${picks > 1 ? "s" : ""} for the next pick.`;
+    msg = `<@${team1Picked ? game.team2[0] : game.team1[0]}> can select **${picksNext}** player${picksNext > 1 ? "s" : ""} for the next pick.`;
   }
 
   message.channel.send(msg, { embed }).catch(() => {});

@@ -8,6 +8,7 @@ export interface IGame extends Document {
   voiceChannel: VoiceChannel["id"];
   team1: GuildMember["id"][];
   team2: GuildMember["id"][];
+  pickNumber: number;
 }
 
 const GameSchema = new Schema({
@@ -17,6 +18,7 @@ const GameSchema = new Schema({
   voiceChannel: { type: String },
   team1: { type: [String] },
   team2: { type: [String] },
+  pickNumber: { type: Number },
 });
 
 export default model<IGame>("Games", GameSchema);
