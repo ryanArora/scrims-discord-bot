@@ -151,6 +151,9 @@ const run: RunCallback = async (client, message, args, settings) => {
   }
 
   const text = message.guild.channels.cache.get(settings.scoredGamesChannel);
+
+  console.log(text);
+
   if (!text?.isText()) return;
 
   const embed = new MessageEmbed();
