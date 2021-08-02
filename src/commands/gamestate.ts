@@ -20,15 +20,15 @@ const run: RunCallback = async (client, message, args, settings) => {
 
   let game: IGame | null = null;
   if (gameId) {
-    const g = await Game.findOne({ gameId }).catch(console.log);
+    const g = await Game.findOne({ gameId });
     if (g) game = g;
   } else {
-    const g = await Game.findOne({ textChannel: message.channel.id }).catch(console.log);
+    const g = await Game.findOne({ textChannel: message.channel.id });
     if (g) game = g;
   }
 
   if (!game) {
-    message.channel.send("You need to provide a gameid as an argumnet or be in a game channel!").catch(() => {});
+    message.channel.send("You need to provide a gameid as an argumnet or be in a game channel!");
     return;
   }
 
@@ -37,7 +37,7 @@ const run: RunCallback = async (client, message, args, settings) => {
     msg = `State of Game #${game.gameId}:` + "```json\n" + JSON.stringify(game, null, 2) + "\n```";
   } catch (e) {}
 
-  message.channel.send(msg).catch(() => {});
+  message.channel.send(msg);
 };
 
 const GameStateCommand: Command = {

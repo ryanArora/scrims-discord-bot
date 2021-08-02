@@ -3,20 +3,19 @@ import axios from "axios";
 import { GuildMember, Util } from "discord.js";
 import getPlayerUpdateNickname from "../util/getPlayerUpdateNickname";
 import canScore from "../util/canScore";
+import { Rank } from "../schemas/Player";
 
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member || !settings) return;
 
   if (!canScore(message.member, settings.scorerRole)) {
-    message.channel.send("You need to be a scorer to run this command!").catch(() => {});
+    message.channel.send("You need to be a scorer to run this command!");
     return;
   }
 
   const name = args[0];
   if (!name) {
-    message.channel.send("You need to have your username as the first argument").catch(() => {
-      console.log("Error sending invalid arguments response");
-    });
+    message.channel.send("You need to have your username as the first argument");
     return;
   }
 
@@ -30,7 +29,7 @@ const run: RunCallback = async (client, message, args, settings) => {
   }
 
   if (!member) {
-    message.channel.send("That user isn't in the server").catch(() => {});
+    message.channel.send("That user isn't in the server");
     return;
   }
 
@@ -41,22 +40,35 @@ const run: RunCallback = async (client, message, args, settings) => {
       const name = res?.data?.name;
 
       if (!uuid || !name) {
-        message.channel.send("Please enter a valid name to register").catch(() => {});
+        message.channel.send("Please enter a valid name to register");
         return;
       }
 
       getPlayerUpdateNickname(member!, uuid, name)
         .then((p) => {
-          message.channel.send("Registered `" + Util.escapeMarkdown(member!.user.tag) + "` as " + Util.escapeMarkdown(p.name)).catch(() => {});
+          message.channel.send("Registered `" + Util.escapeMarkdown(member!.user.tag) + "` as " + Util.escapeMarkdown(p.name));
         })
         .catch((err) => {
-          message.channel.send("Theres already someone registered as that!").catch(() => {});
+          message.channel.send("Theres already someone registered as that!");
           console.log(err);
         });
+
+      if (!message.guild || !member) return;
+
+      const registeredRole = message.guild.roles.cache.get(settings.registeredRole);
+      if (registeredRole) member.roles.add(registeredRole).catch(() => {});
+
+      const rankRoleId = settings.rankRoles[Rank.STONE];
+      if (rankRoleId) {
+        const stoneRole = message.guild.roles.cache.get(rankRoleId);
+        if (stoneRole) {
+          console.log("STone role");
+          member.roles.add(stoneRole).catch(() => {});
+        }
+      }
     })
-    .catch((err) => {
-      message.channel.send("Error getting player from the Mojang API");
-      console.log(err);
+    .catch(() => {
+      message.channel.send("Please enter a valid player as the first argument!");
     });
 };
 

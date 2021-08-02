@@ -2,46 +2,61 @@ import Client from "../structures/Client";
 import { MessageReaction, User } from "discord.js";
 import Event from "../structures/Event";
 import Game, { EGameState } from "../schemas/Game";
+import finishGame from "../util/finishGame";
+import GuildSettings from "../schemas/GuildSettings";
 
 const messageReactionAdd = async (client: Client, reaction: MessageReaction, user: User) => {
-  if (reaction.me) return;
-  if (!reaction.count) return;
+  if (reaction.me || !reaction.count || !reaction.message.guild) return;
   if (client.user?.id && !reaction.users.cache.has(client.user.id)) return;
 
   const embed = reaction.message.embeds[0];
   if (!embed?.description) return;
-  let desc = embed.description;
-
+  const desc = embed.description;
   const i = desc.indexOf("/");
   if (i === -1) return;
 
   const votes = reaction.count - 1;
   const game = await Game.findOne({ textChannel: reaction.message.channel.id });
-  if (!game) return;
-  if (game.state === EGameState.FINISHED) return;
+  if (!game || game.state === EGameState.FINISHED) return;
 
   const limit = game.players.length / 2 + 1;
 
-  if (votes === limit) {
-    if (!game) return;
-
-    game.state = EGameState.FINISHED;
-    game.voided = true;
-    game
-      .save()
-      .then(() => {
-        embed.setDescription("The game has been voided!");
-        reaction.message.edit({ embed }).catch(() => {});
-      })
-      .catch(console.log);
-  } else {
-    // convert to array to manipulate string
+  if (votes !== limit) {
     const descArr = [...desc];
     descArr[i - 1] = votes.toString();
 
     embed.setDescription(descArr.join(""));
     reaction.message.edit({ embed }).catch(() => {});
+
+    return;
   }
+
+  game.state = EGameState.FINISHED;
+  game.voided = true;
+
+  game
+    .save()
+    .then(async () => {
+      embed.setDescription("The game has been voided!");
+      reaction.message.edit({ embed });
+
+      if (!reaction.message.guild) return;
+      const settings = await GuildSettings.findOne({ guildId: reaction.message.guild.id });
+
+      if (!settings) {
+        reaction.message.channel.send("Error getting guild settings!").catch(() => {});
+        return;
+      }
+
+      finishGame(game, reaction.message.guild, settings);
+    })
+    .catch((err) => {
+      const channel = reaction.message.guild?.channels.cache.get(game.textChannel);
+      if (channel && channel.isText()) {
+        channel.send("Error voiding game!").catch(() => {});
+        console.log(err);
+      }
+    });
 };
 
 const MessageReactionAddEvent: Event = {

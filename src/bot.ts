@@ -9,6 +9,9 @@ const intents = new Intents();
 intents.add(Intents.NON_PRIVILEGED);
 intents.add("GUILD_MEMBERS");
 
+process.on("unhandledException", console.error);
+process.on("unhandledRejection", console.error);
+
 const bot = new Client({
   allowedMentions: { parse: ["users"] },
   ws: {

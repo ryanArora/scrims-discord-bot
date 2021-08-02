@@ -22,7 +22,7 @@ const run: RunCallback = async (client, message, args, settings) => {
 
   let team1Picked = !(game.pickNumber % 2);
   if ((team1Picked && game.team1[0] !== message.author.id) || (!team1Picked && game.team2[0] !== message.author.id)) {
-    message.channel.send("It's not your turn to pick!").catch(() => {});
+    message.channel.send("It's not your turn to pick!");
     return;
   }
 
@@ -34,7 +34,7 @@ const run: RunCallback = async (client, message, args, settings) => {
 
   // if user didn't pick the right amount
   if (users.length !== picks) {
-    message.channel.send(`You must select ${picks} player${picks > 1 ? "s" : ""} for this turn`).catch(() => {});
+    message.channel.send(`You must select ${picks} player${picks > 1 ? "s" : ""} for this turn`);
     return;
   }
 
@@ -42,7 +42,7 @@ const run: RunCallback = async (client, message, args, settings) => {
 
   // if user picked someone not in queue
   if (!users.every((u) => remaining.includes(u.id))) {
-    message.channel.send("You can't pick that player!").catch(() => {});
+    message.channel.send("You can't pick that player!");
     return;
   }
 
@@ -87,12 +87,12 @@ const run: RunCallback = async (client, message, args, settings) => {
             game.team2VoiceChannel = voice.id;
             game.state = EGameState.PLAYING;
 
-            game.save().catch(console.log);
+            game.save();
 
             dragPlayers(voice, game.team2, message.channel);
           })
           .catch((err) => {
-            message.channel.send("Error creating team voice channel for team 1").catch(() => {});
+            message.channel.send("Error creating team voice channel for team 1");
           });
 
         await dragPlayers(voice, game.team1, message.channel);
@@ -103,12 +103,12 @@ const run: RunCallback = async (client, message, args, settings) => {
           if (!oldVoice) return;
 
           oldVoice.delete().catch(() => {
-            message.channel.send("Error deleting team picking channel").catch(() => {});
+            message.channel.send("Error deleting team picking channel");
           });
         }, 2000);
       })
       .catch((err) => {
-        message.channel.send("Error creating team voice channel for team 1").catch(() => {});
+        message.channel.send("Error creating team voice channel for team 1");
       });
   }
 
@@ -125,10 +125,10 @@ const run: RunCallback = async (client, message, args, settings) => {
     embed.addField("Remaining Players", mentionsStr(remaining, "\n"));
     msg = `<@${team1Picked ? game.team2[0] : game.team1[0]}> can select **${picksNext}** player${picksNext > 1 ? "s" : ""} for the next pick.`;
 
-    game.save().catch(console.log);
+    game.save();
   }
 
-  message.channel.send(msg, { embed }).catch(() => {});
+  message.channel.send(msg, { embed });
 };
 
 const PickCommand: Command = {

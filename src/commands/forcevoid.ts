@@ -1,6 +1,7 @@
 import Command, { RunCallback } from "../structures/Command";
 import { MessageEmbed } from "discord.js";
 import Game, { EGameState } from "../schemas/Game";
+import finishGame from "../util/finishGame";
 
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !settings) return;
@@ -20,20 +21,30 @@ const run: RunCallback = async (client, message, args, settings) => {
     return;
   }
 
-  const votesNeeded = game.players.length / 2 + 1;
+  game.state = EGameState.FINISHED;
+  game.voided = true;
 
-  const embed = new MessageEmbed();
-  embed.setTitle("Void Request");
-  embed.setDescription(`React to this message to agree to cancel the game.\`0/${votesNeeded}\` people have voted.`);
+  game
+    .save()
+    .then(async () => {
+      const embed = new MessageEmbed();
+      embed.setTitle(`Game #${game.gameId} - Force Void`);
+      embed.setDescription("The game has been voided by force!");
 
-  message.channel.send({ embed }).then((msg) => {
-    msg.react("✔️");
-  });
+      message.channel.send({ embed }).catch(() => {});
+
+      if (!message.guild) return;
+      finishGame(game, message.guild, settings);
+    })
+    .catch((err) => {
+      message.channel.send("Error voiding game!");
+      console.log(err);
+    });
 };
 
-const VoidCommand: Command = {
-  name: "void",
+const ForceVoidCommand: Command = {
+  name: "forcevoid",
   run,
 };
 
-module.exports = VoidCommand;
+module.exports = ForceVoidCommand;

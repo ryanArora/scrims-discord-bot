@@ -20,6 +20,8 @@ export interface IGame extends Document {
   pickNumber: number;
   state: EGameState;
   voided: boolean;
+  mvps: string[];
+  winningTeam: number;
 }
 
 const GameSchema = new Schema({
@@ -34,6 +36,8 @@ const GameSchema = new Schema({
   pickNumber: { type: Number },
   state: { type: Number, enum: Object.values(EGameState) },
   voided: { type: Boolean },
+  mvps: { type: [String] },
+  winningTeam: { type: Number, enum: [1, 2] },
 });
 
 export default model<IGame>("Games", GameSchema);

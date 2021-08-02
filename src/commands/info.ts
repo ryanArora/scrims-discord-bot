@@ -15,11 +15,25 @@ const run: RunCallback = async (client, message, args, settings) => {
         return;
       }
 
-      const { elo, wins, losses, wlr, winstreak, losestreak } = player;
-      message.channel.send(`[${elo}] ${player.name}\n\nWins: ${wins}\nLosses: ${losses}\nWLR: ${wlr}\nWinstreak: ${winstreak}\nLosestreak: ${losestreak}`).catch(() => {});
+      const { elo, eloHigh, wins, losses, winstreak, losestreak, winstreakHigh } = player;
+      let wlr = "";
+      if (wins > 0 && losses === 0) wlr = "∞";
+      else if (wins === 0 && losses === 0) wlr = "0.00";
+      else wlr = (wins / losses).toFixed(2);
+
+      let msg = `[${elo}] ${player.name}\n\n`;
+      msg += `Highest Elo: ${eloHigh}\n`;
+      msg += `Wins: ${wins}\n`;
+      msg += `Losses: ${losses}\n`;
+      msg += `WLR: ${wlr}\n`;
+      msg += `Winstreak: ${winstreak}\n`;
+      msg += `Highest Winstreak: ${winstreakHigh}\n`;
+      msg += `Losestreak: ${losestreak}`;
+
+      message.channel.send(msg);
     })
     .catch(() => {
-      message.channel.send("Unable to fetch player").catch(() => {});
+      message.channel.send("Unable to fetch player");
     });
 };
 

@@ -22,6 +22,8 @@ const getPlayerUpdateNickname = (member: GuildMember, uuid: string, name: string
             mvps: 0,
             winstreak: 0,
             losestreak: 0,
+            winstreakHigh: 0,
+            eloHigh: 0,
           });
         }
 
