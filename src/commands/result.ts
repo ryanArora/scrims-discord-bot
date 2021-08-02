@@ -106,15 +106,15 @@ const run: RunCallback = async (client, message, args, settings) => {
       player.winstreak = 0;
     }
 
-    const member = message.guild.members.cache.get(id);
-    if (member) member.setNickname(`[${player.elo}] ${player.name}`);
-
     if (mvps.includes(id)) {
       player.mvps++;
       const eloToAdd = mvpEloFromRank(rank);
       player.elo += eloToAdd;
       if (player.eloHigh <= player.elo) player.eloHigh += eloToAdd;
     }
+
+    const member = message.guild.members.cache.get(id);
+    if (member) member.setNickname(`[${player.elo}] ${player.name}`);
 
     await player.save().catch((err) => {
       message.channel.send(`Unable to edit <@${id}>'s stats for Game #${game.gameId}`);
