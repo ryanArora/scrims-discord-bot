@@ -15,7 +15,7 @@ const run: RunCallback = async (client, message, args, settings) => {
         return;
       }
 
-      const { elo, eloHigh, wins, losses, winstreak, losestreak, winstreakHigh } = player;
+      const { elo, eloHigh, wins, losses, winstreak, losestreak, winstreakHigh, mvps } = player;
       let wlr = "";
       if (wins > 0 && losses === 0) wlr = "∞";
       else if (wins === 0 && losses === 0) wlr = "0.00";
@@ -26,6 +26,7 @@ const run: RunCallback = async (client, message, args, settings) => {
       msg += `Wins: ${wins}\n`;
       msg += `Losses: ${losses}\n`;
       msg += `WLR: ${wlr}\n`;
+      msg += `MVPs: ${mvps}\n`;
       msg += `Winstreak: ${winstreak}\n`;
       msg += `Highest Winstreak: ${winstreakHigh}\n`;
       msg += `Losestreak: ${losestreak}`;
