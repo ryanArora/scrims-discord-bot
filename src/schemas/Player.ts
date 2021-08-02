@@ -29,6 +29,7 @@ export interface IPlayer extends Document {
   winstreak: number;
   winstreakHigh: number;
   losestreak: number;
+  games: number[];
 }
 
 const PlayerSchema = new Schema({
@@ -43,6 +44,7 @@ const PlayerSchema = new Schema({
   winstreak: { type: Number },
   winstreakHigh: { type: Number },
   losestreak: { type: Number },
+  games: { type: [Number] },
 });
 
 export default model<IPlayer>("Players", PlayerSchema);

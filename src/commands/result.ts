@@ -116,6 +116,8 @@ const run: RunCallback = async (client, message, args, settings) => {
     const member = message.guild.members.cache.get(id);
     if (member) member.setNickname(`[${player.elo}] ${player.name}`);
 
+    player.games.push(game.gameId);
+
     await player.save().catch((err) => {
       message.channel.send(`Unable to edit <@${id}>'s stats for Game #${game.gameId}`);
       console.log(err);
@@ -151,9 +153,6 @@ const run: RunCallback = async (client, message, args, settings) => {
   }
 
   const text = message.guild.channels.cache.get(settings.scoredGamesChannel);
-
-  console.log(text);
-
   if (!text?.isText()) return;
 
   const embed = new MessageEmbed();
