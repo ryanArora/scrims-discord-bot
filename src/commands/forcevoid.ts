@@ -2,10 +2,16 @@ import Command, { RunCallback } from "../structures/Command";
 import { MessageEmbed } from "discord.js";
 import Game, { EGameState } from "../schemas/Game";
 import finishGame from "../util/finishGame";
+import canScore from "../util/canScore";
 
 const run: RunCallback = async (client, message, args, settings) => {
-  if (!message.guild || !settings) return;
+  if (!message.guild || !message.member || !settings) return;
   if (!message.channel.isText()) return;
+
+  if (!canScore(message.member, settings.scorerRole)) {
+    message.channel.send("You don't have permission to do this!");
+    return;
+  }
 
   const game = await Game.findOne({ textChannel: message.channel.id });
   if (!game) {

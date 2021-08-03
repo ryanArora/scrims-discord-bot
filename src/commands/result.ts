@@ -4,6 +4,7 @@ import { Message, MessageEmbed } from "discord.js";
 import Player from "../schemas/Player";
 import { rankFromElo, winEloFromRank, loseEloFromRank, mvpEloFromRank } from "../util/elo";
 import mentionsStr from "../util/mentionsStr";
+import canScore from "../util/canScore";
 
 const deleteMessageLater = (message: Message, ms: number) => {
   setTimeout(() => {
@@ -12,7 +13,12 @@ const deleteMessageLater = (message: Message, ms: number) => {
 };
 
 const run: RunCallback = async (client, message, args, settings) => {
-  if (!message.guild || !settings) return;
+  if (!message.guild || !message.member || !settings) return;
+
+  if (!canScore(message.member, settings.scorerRole)) {
+    message.channel.send("You don't have permission to do this!");
+    return;
+  }
 
   if (!args[0]) {
     message.channel.send("You need to put a game id as the first argument!");
