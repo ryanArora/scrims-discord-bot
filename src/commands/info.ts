@@ -1,5 +1,6 @@
 import Command, { RunCallback } from "../structures/Command";
 import Player from "../schemas/Player";
+import ratioToString from "../util/ratioToString";
 
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member || !settings) return;
@@ -16,16 +17,12 @@ const run: RunCallback = async (client, message, args, settings) => {
       }
 
       const { elo, eloHigh, wins, losses, winstreak, losestreak, winstreakHigh, mvps } = player;
-      let wlr = "";
-      if (wins > 0 && losses === 0) wlr = "∞";
-      else if (wins === 0 && losses === 0) wlr = "0.00";
-      else wlr = (wins / losses).toFixed(2);
 
       let msg = `[${elo}] ${player.name}\n\n`;
       msg += `Highest Elo: ${eloHigh}\n`;
       msg += `Wins: ${wins}\n`;
       msg += `Losses: ${losses}\n`;
-      msg += `WLR: ${wlr}\n`;
+      msg += `WLR: ${ratioToString(wins, losses, 2)}\n`;
       msg += `MVPs: ${mvps}\n`;
       msg += `Winstreak: ${winstreak}\n`;
       msg += `Highest Winstreak: ${winstreakHigh}\n`;
@@ -40,7 +37,7 @@ const run: RunCallback = async (client, message, args, settings) => {
 
 const InfoCommand: Command = {
   name: "info",
-  aliases: ["i, stats"],
+  aliases: ["i"],
   run,
 };
 

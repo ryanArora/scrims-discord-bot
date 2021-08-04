@@ -5,7 +5,7 @@ export const rankFromElo = (elo: number) => {
   else if (elo < 400) return Rank.COAL;
   else if (elo < 600) return Rank.IRON;
   else if (elo < 800) return Rank.GOLD;
-  else if (elo < 100) return Rank.DIAMOND;
+  else if (elo < 1000) return Rank.DIAMOND;
   else if (elo < 1200) return Rank.EMERALD;
   else if (elo < 1400) return Rank.SAPPHIRE;
   else if (elo < 1600) return Rank.RUBY;

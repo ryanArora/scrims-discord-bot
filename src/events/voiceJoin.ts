@@ -4,6 +4,7 @@ import Event from "../structures/Event";
 import Game, { EGameState } from "../schemas/Game";
 import Player from "../schemas/Player";
 import mentionsStr from "../util/mentionsStr";
+import shuffle from "../util/shuffle";
 
 const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceState) => {
   // executed on voicestatechange
@@ -88,8 +89,8 @@ const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceSt
       }
 
       const sorted = [...players].sort((a, b) => (a.elo < b.elo ? 1 : -1)); // highest elo goes to the top
-      const possibleCaptains = sorted.slice(0, Math.floor(playerLimit / 2)); // top 50% of elo can be captains
-      const shuffled = [...possibleCaptains].sort((a, b) => 0.5 - Math.random()); // shuffle
+      // const possibleCaptains = sorted.slice(0, Math.floor(playerLimit / 2));
+      const shuffled = shuffle([...sorted]);
 
       const cap1 = shuffled[0];
       const cap2 = shuffled[1];
