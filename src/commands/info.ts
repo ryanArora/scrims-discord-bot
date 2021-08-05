@@ -29,7 +29,7 @@ const run: RunCallback = async (client, message, args, settings) => {
 
   let gamesMsg = "";
 
-  const games = player.games.slice(-5);
+  const games = player.games.slice(-5).reverse();
   for (const gameId of games) {
     const game = await Game.findOne({ gameId });
     if (!game?.winningTeam) continue;
