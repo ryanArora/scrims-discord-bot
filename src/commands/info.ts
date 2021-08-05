@@ -2,6 +2,7 @@ import Command, { RunCallback } from "../structures/Command";
 import Player from "../schemas/Player";
 import Game from "../schemas/Game";
 import ratioToString from "../util/ratioToString";
+import percentageString from "../util/percentageString";
 import { MessageEmbed, Util } from "discord.js";
 
 const run: RunCallback = async (client, message, args, settings) => {
@@ -52,7 +53,7 @@ const run: RunCallback = async (client, message, args, settings) => {
   msg += `Games: **${wins + losses}**\n`;
   msg += `MVPs: **${mvps}**\n`;
   msg += `Win/Loss Rate: **${ratioToString(wins, losses, 2)}**\n`;
-  msg += `MVP Rate: **${ratioToString(mvps, wins + losses, 2)}**\n`;
+  msg += `MVP Rate: **${percentageString(mvps, wins + losses, 0)}**\n`;
   msg += `Highest Elo: **${eloHigh}**\n`;
   msg += `Winstreak: **${winstreak}**\n`;
   msg += `Highest Winstreak: **${winstreakHigh}**\n`;

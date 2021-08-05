@@ -2,6 +2,7 @@ import Command, { RunCallback } from "../structures/Command";
 import Player from "../schemas/Player";
 import { MessageEmbed } from "discord.js";
 import ratioToString from "../util/ratioToString";
+import percentageString from "../util/percentageString";
 
 const getRatio = (num: number, den: number) => {
   if (num === 0 && den === 0) return 0;
@@ -89,7 +90,7 @@ const run: RunCallback = async (client, message, args, settings) => {
     } else if (cute === "Win/Loss Rate") {
       msg += ratioToString(player.wins, player.losses, 2);
     } else if (cute === "MVP Rate") {
-      msg += ratioToString(player.mvps, player.wins + player.losses, 2);
+      msg += percentageString(player.mvps, player.wins + player.losses, 0);
     } else if (cute === "Winstreak") {
       msg += player.winstreak;
     } else if (cute === "Losestreak") {
@@ -109,8 +110,9 @@ const run: RunCallback = async (client, message, args, settings) => {
 
   const embed = new MessageEmbed();
   embed.setTitle(`Leaderboard - ${cute}`);
-  embed.setFooter(`Page ${page}`);
   embed.setDescription(msg);
+  embed.setFooter(`Page ${page}`);
+  embed.setTimestamp();
 
   message.channel.send({ embed }).catch(() => {});
 };
