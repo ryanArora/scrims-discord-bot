@@ -3,6 +3,11 @@ import Player from "../schemas/Player";
 import { MessageEmbed } from "discord.js";
 import ratioToString from "../util/ratioToString";
 
+const getRatio = (num: number, den: number) => {
+  if (num === 0 && den === 0) return 0;
+  else return num / den;
+};
+
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member || !settings) return;
 
@@ -34,8 +39,11 @@ const run: RunCallback = async (client, message, args, settings) => {
     players.sort((a, b) => b.mvps - a.mvps);
     cute = "MVPs";
   } else if (stat === "winloss" || stat === "wlr" || stat === "wl") {
-    players.sort((a, b) => b.wins / b.losses - a.wins / a.losses);
-    cute = "Winloss";
+    players.sort((a, b) => getRatio(b.wins, b.losses) - getRatio(a.wins, a.losses));
+    cute = "Win/Loss Rate";
+  } else if (stat === "mvpr" || stat === "mvprate" || stat === "mvpgames") {
+    players.sort((a, b) => getRatio(b.mvps, b.wins + b.losses) - getRatio(a.mvps, a.wins + a.losses));
+    cute = "MVP Rate";
   } else if (stat === "winstreak" || stat === "ws") {
     players.sort((a, b) => b.winstreak - a.winstreak);
     cute = "Winstreak";
@@ -78,8 +86,10 @@ const run: RunCallback = async (client, message, args, settings) => {
       msg += player.wins + player.losses;
     } else if (cute === "MVPs") {
       msg += player.mvps;
-    } else if (cute === "Winloss") {
+    } else if (cute === "Win/Loss Rate") {
       msg += ratioToString(player.wins, player.losses, 2);
+    } else if (cute === "MVP Rate") {
+      msg += ratioToString(player.mvps, player.wins + player.losses, 2);
     } else if (cute === "Winstreak") {
       msg += player.winstreak;
     } else if (cute === "Losestreak") {
