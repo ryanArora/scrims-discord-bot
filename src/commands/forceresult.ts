@@ -72,6 +72,9 @@ const run: RunCallback = async (client, message, args, settings) => {
     player.losestreak = 0;
     player.mvps = 0;
 
+    player.games.push(gameId);
+    player.games.sort((a, b) => a - b);
+
     for (const gameId of player.games) {
       const game = games.find((g) => g.gameId === gameId);
       if (!game) continue;
