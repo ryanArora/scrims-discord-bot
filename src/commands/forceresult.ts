@@ -5,7 +5,7 @@ import canScore from "../util/canScore";
 import { rankFromElo, winEloFromRank, loseEloFromRank, mvpEloFromRank } from "../util/elo";
 
 const run: RunCallback = async (client, message, args, settings) => {
-  if (!message.member || !settings) return;
+  if (!message.guild || !message.member || !settings) return;
 
   if (!canScore(message.member, settings.scorerRole)) {
     message.channel.send("You need to be a scorer to run this command!");
@@ -115,17 +115,28 @@ const run: RunCallback = async (client, message, args, settings) => {
         player.elo += eloToAdd;
         if (player.eloHigh <= player.elo) player.eloHigh += eloToAdd;
       }
-    }
 
-    const { name, elo, eloHigh, wins, losses, winstreak, winstreakHigh, losestreak } = player;
-    console.log(`${name} - New Stats\n`);
-    console.log(`ELO: ${elo}\n`);
-    console.log(`Peak ELO: ${eloHigh}\n`);
-    console.log(`Wins: ${wins}\n`);
-    console.log(`Losses: ${losses}\n`);
-    console.log(`Winstreak: ${winstreak}\n`);
-    console.log(`Highest Winstreak: ${winstreakHigh}\n`);
-    console.log(`Losestreak: ${losestreak}\n\n`);
+      const newRank = rankFromElo(player.elo);
+
+      if (rank !== newRank) {
+        const member = message.guild.members.cache.get(player.discordId);
+        if (member) {
+          member.roles.cache.forEach(async (role) => {
+            if (settings.rankRoles.includes(role.id)) {
+              await member.roles.remove(role);
+            }
+          });
+
+          const rankRoleId = settings.rankRoles[newRank];
+          if (rankRoleId) {
+            const role = message.guild.roles.cache.get(rankRoleId);
+            if (role) {
+              member.roles.add(role);
+            }
+          }
+        }
+      }
+    }
   }
 };
 
