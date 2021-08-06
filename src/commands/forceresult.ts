@@ -118,8 +118,15 @@ const run: RunCallback = async (client, message, args, settings) => {
 
       const newRank = rankFromElo(player.elo);
 
+      // await player.save().catch((err) => {
+      //   message.channel.send(`Unable to edit <@${id}>'s stats for Game #${game.gameId}`);
+      //   console.log(err);
+      // });
+
+      const member = message.guild.members.cache.get(discordId);
+      if (member) member.setNickname(`[${player.elo}] ${player.name}`);
+
       if (rank !== newRank) {
-        const member = message.guild.members.cache.get(player.discordId);
         if (member) {
           member.roles.cache.forEach(async (role) => {
             if (settings.rankRoles.includes(role.id)) {

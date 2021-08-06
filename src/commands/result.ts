@@ -124,7 +124,6 @@ const run: RunCallback = async (client, message, args, settings) => {
     }
 
     if (rank !== newRank) {
-      const member = message.guild.members.cache.get(player.discordId);
       if (member) {
         member.roles.cache.forEach(async (role) => {
           if (settings.rankRoles.includes(role.id)) {
