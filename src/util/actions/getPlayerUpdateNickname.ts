@@ -1,5 +1,5 @@
 import { GuildMember } from "discord.js";
-import Player, { IPlayer } from "../schemas/Player";
+import Player, { IPlayer } from "../../schemas/Player";
 
 const getPlayerUpdateNickname = (member: GuildMember, uuid: string, name: string) => {
   return new Promise<IPlayer>((resolve, reject) => {

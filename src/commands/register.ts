@@ -1,7 +1,7 @@
 import Command, { RunCallback } from "../structures/Command";
 import axios from "axios";
 import { Util } from "discord.js";
-import getPlayerUpdateNickname from "../util/getPlayerUpdateNickname";
+import getPlayerUpdateNickname from "../util/actions/getPlayerUpdateNickname";
 import { Rank } from "../schemas/Player";
 import isInGuild from "../util/isInGuild";
 

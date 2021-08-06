@@ -1,7 +1,7 @@
 import Command, { RunCallback } from "../structures/Command";
 import { MessageEmbed } from "discord.js";
 import Game, { EGameState } from "../schemas/Game";
-import finishGame from "../util/finishGame";
+import finishGame from "../util/actions/finishGame";
 import canScore from "../util/canScore";
 
 const run: RunCallback = async (client, message, args, settings) => {
@@ -9,7 +9,7 @@ const run: RunCallback = async (client, message, args, settings) => {
   if (!message.channel.isText()) return;
 
   if (!canScore(message.member, settings.scorerRole)) {
-    message.channel.send("You don't have permission to do this!");
+    message.channel.send("You need to be a scorer to run this command!");
     return;
   }
 

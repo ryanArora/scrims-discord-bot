@@ -1,5 +1,5 @@
-import { IGame } from "../schemas/Game";
-import { IGuildSettings } from "../schemas/GuildSettings";
+import { IGame } from "../../schemas/Game";
+import { IGuildSettings } from "../../schemas/GuildSettings";
 import { OverwriteResolvable, Guild, GuildChannel, VoiceChannel, MessageEmbed } from "discord.js";
 
 const getBaseChannelOverwrites = (defaultRole: Guild["id"], scorerRole: IGuildSettings["scorerRole"]) => {

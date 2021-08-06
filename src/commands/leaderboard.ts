@@ -1,8 +1,8 @@
 import Command, { RunCallback } from "../structures/Command";
 import Player from "../schemas/Player";
 import { MessageEmbed } from "discord.js";
-import ratioToString from "../util/ratioToString";
-import percentageString from "../util/percentageString";
+import ratioStr from "../util/str/ratioStr";
+import percentageStr from "../util/str/percentageStr";
 
 const getRatio = (num: number, den: number) => {
   if (num === 0 && den === 0) return 0;
@@ -88,9 +88,9 @@ const run: RunCallback = async (client, message, args, settings) => {
     } else if (cute === "MVPs") {
       msg += player.mvps;
     } else if (cute === "Win/Loss Rate") {
-      msg += ratioToString(player.wins, player.losses, 2);
+      msg += ratioStr(player.wins, player.losses, 2);
     } else if (cute === "MVP Rate") {
-      msg += percentageString(player.mvps, player.wins + player.losses, 0);
+      msg += percentageStr(player.mvps, player.wins + player.losses, 0);
     } else if (cute === "Winstreak") {
       msg += player.winstreak;
     } else if (cute === "Losestreak") {

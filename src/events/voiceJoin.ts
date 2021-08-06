@@ -3,7 +3,7 @@ import { MessageEmbed, OverwriteResolvable, VoiceState } from "discord.js";
 import Event from "../structures/Event";
 import Game, { EGameState } from "../schemas/Game";
 import Player from "../schemas/Player";
-import mentionsStr from "../util/mentionsStr";
+import mentionsStr from "../util/str/mentionsStr";
 import shuffle from "../util/shuffle";
 
 const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceState) => {

@@ -6,7 +6,7 @@ const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member || !settings) return;
 
   if (!canScore(message.member, settings.scorerRole)) {
-    message.channel.send("You need to be a scorer to do that!");
+    message.channel.send("You need to be a scorer to run this command!");
     return;
   }
 

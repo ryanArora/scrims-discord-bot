@@ -1,16 +1,10 @@
 import Game, { EGameState } from "../schemas/Game";
 import Command, { RunCallback } from "../structures/Command";
-import { Message, MessageEmbed } from "discord.js";
+import { MessageEmbed } from "discord.js";
 import Player from "../schemas/Player";
 import { rankFromElo, winEloFromRank, loseEloFromRank, mvpEloFromRank } from "../util/elo";
-import mentionsStr from "../util/mentionsStr";
+import mentionsStr from "../util/str/mentionsStr";
 import canScore from "../util/canScore";
-
-const deleteMessageLater = (message: Message, ms: number) => {
-  setTimeout(() => {
-    message.delete();
-  }, ms);
-};
 
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member || !settings) return;
@@ -20,24 +14,17 @@ const run: RunCallback = async (client, message, args, settings) => {
     return;
   }
 
-  if (!args[0]) {
+  const gameId = parseInt(args[0] as string, 10);
+  if (isNaN(gameId)) {
     message.channel.send("You need to put a game id as the first argument!");
     return;
   }
 
-  let gameId: number | null = null;
-  try {
-    gameId = parseInt(args[0] as string, 10);
-  } catch (e) {
-    message.channel.send("You need to have number as a game id!");
-    return;
-  }
-
-  if (args[1] !== "1" && args[1] !== "2") {
+  const winningTeam = parseInt(args[1] as string, 10);
+  if (winningTeam !== 1 && winningTeam !== 2) {
     message.channel.send("You need to put the winining team as the second argument!");
     return;
   }
-  const winningTeam = parseInt(args[1], 10);
 
   const mvps = message.mentions.users.map((u) => u.id);
   if (mvps.length <= 0) {
@@ -66,13 +53,11 @@ const run: RunCallback = async (client, message, args, settings) => {
   game.mvps = mvps;
   game.winningTeam = winningTeam;
 
-  await game.save().catch(async () => {
-    const msg = await message.reply(`Failed to save score result for game #${gameId}!`);
-    deleteMessageLater(msg, 5000);
+  await game.save().catch(() => {
+    message.reply(`Failed to save score result for game #${gameId}!`);
   });
 
-  const msg = await message.channel.send(`Saved score result for game ${gameId}!`);
-  deleteMessageLater(msg, 5000);
+  message.channel.send(`Saved score result for game ${gameId}!`);
 
   let team1Str = "";
   let team2Str = "";

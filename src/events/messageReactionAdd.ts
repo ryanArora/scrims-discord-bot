@@ -2,7 +2,7 @@ import Client from "../structures/Client";
 import { MessageReaction, User } from "discord.js";
 import Event from "../structures/Event";
 import Game, { EGameState } from "../schemas/Game";
-import finishGame from "../util/finishGame";
+import finishGame from "../util/actions/finishGame";
 import GuildSettings from "../schemas/GuildSettings";
 
 const messageReactionAdd = async (client: Client, reaction: MessageReaction, user: User) => {

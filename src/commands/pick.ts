@@ -1,9 +1,9 @@
 import Command, { RunCallback } from "../structures/Command";
 import Game, { EGameState } from "../schemas/Game";
 import { MessageEmbed } from "discord.js";
-import mentionsStr from "../util/mentionsStr";
-import getPicksAmount from "../util/getPicksAmount";
-import dragPlayers from "../util/dragPlayers";
+import mentionsStr from "../util/str/mentionsStr";
+import getPicksAmount from "../util/getPicks";
+import dragPlayers from "../util/actions/dragPlayers";
 
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member || !settings) return;

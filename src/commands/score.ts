@@ -1,10 +1,10 @@
 import Command, { RunCallback } from "../structures/Command";
 import { MessageEmbed } from "discord.js";
 import Game, { EGameState } from "../schemas/Game";
-import mentionsStr from "../util/mentionsStr";
+import mentionsStr from "../util/str/mentionsStr";
 import getLastUrlRoute from "../util/getLastUrlRoute";
 import getFileExtension from "../util/getFileExtension";
-import finishGame from "../util/finishGame";
+import finishGame from "../util/actions/finishGame";
 
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member || !settings) return;
