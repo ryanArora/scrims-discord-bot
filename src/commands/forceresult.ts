@@ -36,7 +36,7 @@ const run: RunCallback = async (client, message, args, settings) => {
     return;
   }
 
-  const game = games.find((g) => g.id === gameId);
+  const game = games.find((g) => g.gameId === gameId);
   if (!game) {
     message.channel.send("You need to enter a valid game id!");
     return;
