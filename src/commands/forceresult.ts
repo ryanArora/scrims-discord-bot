@@ -63,6 +63,9 @@ const run: RunCallback = async (client, message, args, settings) => {
       continue;
     }
 
+    console.log(player.name);
+    console.log("OLD:", player.elo);
+
     player.elo = 0;
     player.eloHigh = 0;
     player.wins = 0;
@@ -76,9 +79,6 @@ const run: RunCallback = async (client, message, args, settings) => {
     player.games.sort((a, b) => a - b);
 
     const rank = rankFromElo(player.elo);
-
-    console.log(player.name);
-    console.log("OLD:", player.elo);
 
     for (const gameId of player.games) {
       const game = games.find((g) => g.gameId === gameId);
