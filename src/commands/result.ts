@@ -2,9 +2,11 @@ import Game, { EGameState } from "../schemas/Game";
 import Command, { RunCallback } from "../structures/Command";
 import { MessageEmbed } from "discord.js";
 import Player from "../schemas/Player";
-import { rankFromElo, winEloFromRank, loseEloFromRank, mvpEloFromRank } from "../util/elo";
 import mentionsStr from "../util/str/mentionsStr";
 import canScore from "../util/canScore";
+import updateMember from "../util/actions/updateMember";
+import getNewPlayerStats from "../util/getNewPlayerStats";
+import eloDifferenceStr from "../util/str/eloDifferenceStr";
 
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member || !settings) return;
@@ -62,85 +64,35 @@ const run: RunCallback = async (client, message, args, settings) => {
   let team1Str = "";
   let team2Str = "";
 
-  for (const id of game.players) {
-    let win = false;
-    if (game.winningTeam === 1 ? game.team1.includes(id) : game.team2.includes(id)) win = true;
-
-    const player = await Player.findOne({ discordId: id });
+  for (const discordId of game.players) {
+    let player = await Player.findOne({ discordId });
     if (!player) {
-      message.channel.send(`Game #${game.gameId} was not scored for <@${id}>, player was not found`);
+      message.channel.send(`Game #${game.gameId} was not scored for <@${discordId}>, player was not found`);
       continue;
     }
 
     const oldElo = player.elo;
-
-    const rank = rankFromElo(player.elo);
-    if (win) {
-      const eloToAdd = winEloFromRank(rank);
-      player.elo += eloToAdd;
-
-      // Increment highest elo
-      if (player.eloHigh <= player.elo) player.eloHigh = oldElo + eloToAdd;
-
-      // Increment highest winstreak
-      if (player.winstreak >= player.winstreakHigh) player.winstreakHigh = player.winstreak + 1;
-
-      player.winstreak++;
-      player.wins++;
-      player.losestreak = 0;
-    } else {
-      // truly unlucky when this code is executed
-      player.elo -= loseEloFromRank(rank);
-      if (player.elo < 0) player.elo = 0;
-      player.losestreak++;
-      player.losses++;
-      player.winstreak = 0;
-    }
-
-    if (mvps.includes(id)) {
-      player.mvps++;
-      const eloToAdd = mvpEloFromRank(rank);
-      player.elo += eloToAdd;
-      if (player.eloHigh <= player.elo) player.eloHigh += eloToAdd;
-    }
-
-    const member = message.guild.members.cache.get(id);
-    if (member) member.setNickname(`[${player.elo}] ${player.name}`);
-
-    player.games.push(game.gameId);
+    player = getNewPlayerStats(player, game);
 
     await player.save().catch((err) => {
-      message.channel.send(`Unable to edit <@${id}>'s stats for Game #${game.gameId}`);
+      message.channel.send(`Unable to edit <@${discordId}>'s stats for Game #${game.gameId}`);
       console.log(err);
     });
 
-    const isTeam1 = game.team1.includes(id);
-    const newRank = rankFromElo(player.elo);
+    const member = message.guild.members.cache.get(player.discordId);
+    if (member) updateMember(member, player.name, player.elo, oldElo, settings.rankRoles);
+    player.games.push(game.gameId);
 
+    const isTeam1 = game.team1.includes(player.discordId);
     if (isTeam1) {
-      team1Str += `${player.name} [\`${oldElo}\` ➜ \`${player.elo}\`] Rank: <@&${settings.rankRoles[rank]}> ➜ ${rank === newRank ? "N/A" : `<@&${settings.rankRoles[newRank]}>`}\n`;
+      team1Str += eloDifferenceStr(player.name, player.elo, oldElo, settings.rankRoles, "\n");
     } else {
-      team2Str += `${player.name} [\`${oldElo}\` ➜ \`${player.elo}\`] Rank: <@&${settings.rankRoles[rank]}> ➜ ${rank === newRank ? "N/A" : `<@&${settings.rankRoles[newRank]}>`}\n`;
-    }
-
-    if (rank !== newRank) {
-      if (member) {
-        member.roles.cache.forEach(async (role) => {
-          if (settings.rankRoles.includes(role.id)) {
-            await member.roles.remove(role);
-          }
-        });
-
-        const rankRoleId = settings.rankRoles[newRank];
-        if (rankRoleId) {
-          const role = message.guild.roles.cache.get(rankRoleId);
-          if (role) {
-            member.roles.add(role);
-          }
-        }
-      }
+      team2Str += eloDifferenceStr(player.name, player.elo, oldElo, settings.rankRoles, "\n");
     }
   }
+
+  const oldText = message.guild.channels.cache.get(game.textChannel);
+  if (oldText) oldText.delete();
 
   const text = message.guild.channels.cache.get(settings.scoredGamesChannel);
   if (!text?.isText()) return;
@@ -152,9 +104,6 @@ const run: RunCallback = async (client, message, args, settings) => {
   embed.addField("Team 2", team2Str.slice(0, -1));
 
   text.send(mentionsStr(game.players, " "), { embed });
-
-  const oldText = message.guild.channels.cache.get(game.textChannel);
-  if (oldText) oldText.delete().catch(console.log);
 };
 
 const ResultCommand: Command = {

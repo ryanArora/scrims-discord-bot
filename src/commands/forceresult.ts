@@ -1,14 +1,17 @@
+import { MessageEmbed } from "discord.js";
 import Game, { EGameState } from "../schemas/Game";
 import Player from "../schemas/Player";
 import Command, { RunCallback } from "../structures/Command";
-import canScore from "../util/canScore";
-import { rankFromElo, winEloFromRank, loseEloFromRank, mvpEloFromRank } from "../util/elo";
+import getNewPlayerStats from "../util/getNewPlayerStats";
+import updateMember from "../util/actions/updateMember";
+import eloDifferenceStr from "../util/str/eloDifferenceStr";
+import mentionsStr from "../util/str/mentionsStr";
 
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member || !settings) return;
 
-  if (!canScore(message.member, settings.scorerRole)) {
-    message.channel.send("You need to be a scorer to run this command!");
+  if (!message.member.hasPermission("ADMINISTRATOR")) {
+    message.channel.send("You need to be an admin to do that!");
     return;
   }
 
@@ -56,12 +59,17 @@ const run: RunCallback = async (client, message, args, settings) => {
     message.reply(`Failed to save score result for game #${gameId}!`);
   });
 
+  let team1Str = "";
+  let team2Str = "";
+
   for (const discordId of game.players) {
-    const player = await Player.findOne({ discordId });
+    let player = await Player.findOne({ discordId });
     if (!player) {
       message.channel.send(`Failed to update stats for <@${discordId}>`);
       continue;
     }
+
+    const oldElo = player.elo;
 
     player.elo = 0;
     player.eloHigh = 0;
@@ -75,80 +83,43 @@ const run: RunCallback = async (client, message, args, settings) => {
     player.games.push(gameId);
     player.games.sort((a, b) => a - b);
 
-    const rank = rankFromElo(player.elo);
-
     for (const gameId of player.games) {
       const game = games.find((g) => g.gameId === gameId);
       if (!game) continue;
-      if (game.voided) continue;
-      if (game.state !== EGameState.FINISHED) continue;
-
-      const win = (game.winningTeam === 1 && game.team1.includes(discordId)) || (game.winningTeam === 2 && game.team2.includes(discordId));
-      const mvp = game.mvps.includes(discordId);
-
-      const oldElo = player.elo;
-      const rank = rankFromElo(player.elo);
-
-      if (win) {
-        const eloToAdd = winEloFromRank(rank);
-        player.elo += eloToAdd;
-
-        // Increment highest elo
-        if (player.eloHigh <= player.elo) player.eloHigh = oldElo + eloToAdd;
-
-        // Increment highest winstreak
-        if (player.winstreak >= player.winstreakHigh) player.winstreakHigh = player.winstreak + 1;
-
-        player.winstreak++;
-        player.wins++;
-        player.losestreak = 0;
-      } else {
-        // truly unlucky when this code is executed
-        player.elo -= loseEloFromRank(rank);
-        if (player.elo < 0) player.elo = 0;
-        player.losestreak++;
-        player.losses++;
-        player.winstreak = 0;
-      }
-
-      if (mvp) {
-        player.mvps++;
-        const eloToAdd = mvpEloFromRank(rank);
-        player.elo += eloToAdd;
-        if (player.eloHigh <= player.elo) player.eloHigh += eloToAdd;
-      }
+      player = getNewPlayerStats(player, game);
     }
 
-    const newRank = rankFromElo(player.elo);
+    const isTeam1 = game.team1.includes(player.discordId);
+    if (isTeam1) {
+      team1Str += eloDifferenceStr(player.name, player.elo, oldElo, settings.rankRoles, "\n");
+    } else {
+      team2Str += eloDifferenceStr(player.name, player.elo, oldElo, settings.rankRoles, "\n");
+    }
 
     await player.save().catch((err) => {
       message.channel.send(`Unable to edit <@${discordId}>'s stats for Game #${game.gameId}`);
       console.log(err);
     });
 
-    const member = message.guild.members.cache.get(discordId);
-    if (member) member.setNickname(`[${player.elo}] ${player.name}`);
-
-    if (rank !== newRank) {
-      if (member) {
-        member.roles.cache.forEach(async (role) => {
-          if (settings.rankRoles.includes(role.id)) {
-            await member.roles.remove(role);
-          }
-        });
-
-        const rankRoleId = settings.rankRoles[newRank];
-        if (rankRoleId) {
-          const role = message.guild.roles.cache.get(rankRoleId);
-          if (role) {
-            member.roles.add(role);
-          }
-        }
-      }
-    }
+    const member = message.guild.members.cache.get(player.discordId);
+    if (member) updateMember(member, player.name, player.elo, oldElo, settings.rankRoles);
   }
 
   message.channel.send("Changed game result!");
+
+  const oldText = message.guild.channels.cache.get(game.textChannel);
+  if (oldText) oldText.delete();
+
+  const text = message.guild.channels.cache.get(settings.scoredGamesChannel);
+  if (!text?.isText()) return;
+
+  const embed = new MessageEmbed();
+  embed.setTitle(`Game #${game.gameId} - Game Result Changed`);
+  embed.setDescription(`Winner: Team ${game.winningTeam === 1 ? "1" : "2"}\nMVP${game.mvps.length === 1 ? "" : "s"}: ${mentionsStr(game.mvps, " ")}`);
+  embed.addField("Team 1", team1Str.slice(0, -1));
+  embed.addField("Team 2", team2Str.slice(0, -1));
+
+  text.send(mentionsStr(game.players, " "), { embed });
 };
 
 const ForceResultCommand: Command = {
