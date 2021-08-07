@@ -63,9 +63,6 @@ const run: RunCallback = async (client, message, args, settings) => {
       continue;
     }
 
-    console.log(player.name);
-    console.log("OLD:", player.elo);
-
     player.elo = 0;
     player.eloHigh = 0;
     player.wins = 0;
@@ -122,14 +119,12 @@ const run: RunCallback = async (client, message, args, settings) => {
       }
     }
 
-    console.log("NEW:", player.elo);
-
     const newRank = rankFromElo(player.elo);
 
-    // await player.save().catch((err) => {
-    //   message.channel.send(`Unable to edit <@${id}>'s stats for Game #${game.gameId}`);
-    //   console.log(err);
-    // });
+    await player.save().catch((err) => {
+      message.channel.send(`Unable to edit <@${discordId}>'s stats for Game #${game.gameId}`);
+      console.log(err);
+    });
 
     const member = message.guild.members.cache.get(discordId);
     if (member) member.setNickname(`[${player.elo}] ${player.name}`);
@@ -152,6 +147,8 @@ const run: RunCallback = async (client, message, args, settings) => {
       }
     }
   }
+
+  message.channel.send("Changed game result!");
 };
 
 const ForceResultCommand: Command = {
