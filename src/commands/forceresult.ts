@@ -77,6 +77,9 @@ const run: RunCallback = async (client, message, args, settings) => {
 
     const rank = rankFromElo(player.elo);
 
+    console.log(player.name);
+    console.log("OLD:", player.elo);
+
     for (const gameId of player.games) {
       const game = games.find((g) => g.gameId === gameId);
       if (!game) continue;
@@ -118,6 +121,8 @@ const run: RunCallback = async (client, message, args, settings) => {
         if (player.eloHigh <= player.elo) player.eloHigh += eloToAdd;
       }
     }
+
+    console.log("NEW:", player.elo);
 
     const newRank = rankFromElo(player.elo);
 
