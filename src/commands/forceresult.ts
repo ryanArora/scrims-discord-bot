@@ -75,6 +75,8 @@ const run: RunCallback = async (client, message, args, settings) => {
     player.games.push(gameId);
     player.games.sort((a, b) => a - b);
 
+    const rank = rankFromElo(player.elo);
+
     for (const gameId of player.games) {
       const game = games.find((g) => g.gameId === gameId);
       if (!game) continue;
@@ -115,31 +117,31 @@ const run: RunCallback = async (client, message, args, settings) => {
         player.elo += eloToAdd;
         if (player.eloHigh <= player.elo) player.eloHigh += eloToAdd;
       }
+    }
 
-      const newRank = rankFromElo(player.elo);
+    const newRank = rankFromElo(player.elo);
 
-      // await player.save().catch((err) => {
-      //   message.channel.send(`Unable to edit <@${id}>'s stats for Game #${game.gameId}`);
-      //   console.log(err);
-      // });
+    // await player.save().catch((err) => {
+    //   message.channel.send(`Unable to edit <@${id}>'s stats for Game #${game.gameId}`);
+    //   console.log(err);
+    // });
 
-      const member = message.guild.members.cache.get(discordId);
-      if (member) member.setNickname(`[${player.elo}] ${player.name}`);
+    const member = message.guild.members.cache.get(discordId);
+    if (member) member.setNickname(`[${player.elo}] ${player.name}`);
 
-      if (rank !== newRank) {
-        if (member) {
-          member.roles.cache.forEach(async (role) => {
-            if (settings.rankRoles.includes(role.id)) {
-              await member.roles.remove(role);
-            }
-          });
+    if (rank !== newRank) {
+      if (member) {
+        member.roles.cache.forEach(async (role) => {
+          if (settings.rankRoles.includes(role.id)) {
+            await member.roles.remove(role);
+          }
+        });
 
-          const rankRoleId = settings.rankRoles[newRank];
-          if (rankRoleId) {
-            const role = message.guild.roles.cache.get(rankRoleId);
-            if (role) {
-              member.roles.add(role);
-            }
+        const rankRoleId = settings.rankRoles[newRank];
+        if (rankRoleId) {
+          const role = message.guild.roles.cache.get(rankRoleId);
+          if (role) {
+            member.roles.add(role);
           }
         }
       }
