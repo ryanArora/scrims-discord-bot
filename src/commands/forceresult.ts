@@ -6,6 +6,7 @@ import getNewPlayerStats from "../util/getNewPlayerStats";
 import updateMember from "../util/actions/updateMember";
 import eloDifferenceStr from "../util/str/eloDifferenceStr";
 import mentionsStr from "../util/str/mentionsStr";
+import removeDuplicates from "../util/removeDuplicates";
 
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member || !settings) return;
@@ -80,7 +81,8 @@ const run: RunCallback = async (client, message, args, settings) => {
     player.losestreak = 0;
     player.mvps = 0;
 
-    player.games.push(gameId);
+    if (!player.games.includes(gameId)) player.games.push(gameId);
+    player.games = removeDuplicates(player.games);
     player.games.sort((a, b) => a - b);
 
     for (const gameId of player.games) {
@@ -115,6 +117,7 @@ const run: RunCallback = async (client, message, args, settings) => {
 
   const embed = new MessageEmbed();
   embed.setTitle(`Game #${game.gameId} - Game Result Changed`);
+  embed.setColor("#a36bed");
   embed.setDescription(`Winner: Team ${game.winningTeam === 1 ? "1" : "2"}\nMVP${game.mvps.length === 1 ? "" : "s"}: ${mentionsStr(game.mvps, " ")}`);
   embed.addField("Team 1", team1Str.slice(0, -1));
   embed.addField("Team 2", team2Str.slice(0, -1));

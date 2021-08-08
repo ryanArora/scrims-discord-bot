@@ -35,6 +35,7 @@ const run: RunCallback = async (client, message, args, settings) => {
     .then(async () => {
       const embed = new MessageEmbed();
       embed.setTitle(`Game #${game.gameId} - Force Void`);
+      embed.setColor("#a36bed");
       embed.setDescription("The game has been voided by force!");
 
       message.channel.send({ embeds: [embed] });

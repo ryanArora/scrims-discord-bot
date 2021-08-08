@@ -61,7 +61,7 @@ const run: RunCallback = async (client, message, args, settings) => {
   for (const u of users) remaining.splice(remaining.indexOf(u.id), 1);
 
   const embed = new MessageEmbed();
-  let msg = "";
+  embed.setColor("#a36bed");
 
   if (remaining.length === 1) {
     embed.setTitle(`Game #${game.gameId} - Start Game`);
@@ -119,6 +119,8 @@ const run: RunCallback = async (client, message, args, settings) => {
   let team2Str = `Captain: <@${game.team2[0]}>`;
   if (game.team2.length > 1) team2Str += `\nPlayers: ${mentionsStr(game.team2.slice(1), "\n")}`;
   embed.addField("Team 2", team2Str);
+
+  let msg = "The teams have been picked! The game will start shortly.";
 
   if (remaining.length > 1) {
     embed.setTitle(`Game #${game.gameId} - Picking Teams`);

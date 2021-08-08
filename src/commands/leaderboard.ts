@@ -110,6 +110,7 @@ const run: RunCallback = async (client, message, args, settings) => {
 
   const embed = new MessageEmbed();
   embed.setTitle(`Leaderboard - ${cute}`);
+  embed.setColor("#a36bed");
   embed.setDescription(msg);
   embed.setFooter(`Page ${page}`);
   embed.setTimestamp();

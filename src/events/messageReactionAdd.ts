@@ -6,8 +6,11 @@ import finishGame from "../util/actions/finishGame";
 import GuildSettings from "../schemas/GuildSettings";
 
 const messageReactionAdd = async (client: Client, reaction: MessageReaction, user: User) => {
-  if (reaction.me || !reaction.count || !reaction.message.guild) return;
-  if (client.user?.id && !reaction.users.cache.has(client.user.id)) return;
+  if (!reaction.me || !reaction.count || !reaction.message.guild) return;
+  if (user?.bot) return;
+
+  const game = await Game.findOne({ textChannel: reaction.message.channel.id });
+  if (!game || game.state === GameState.FINISHED || !game.players.includes(user.id)) return;
 
   const embed = reaction.message.embeds[0];
   if (!embed?.description) return;
@@ -16,9 +19,6 @@ const messageReactionAdd = async (client: Client, reaction: MessageReaction, use
   if (i === -1) return;
 
   const votes = reaction.count - 1;
-  const game = await Game.findOne({ textChannel: reaction.message.channel.id });
-  if (!game || game.state === GameState.FINISHED) return;
-
   const limit = game.players.length / 2 + 1;
 
   if (votes !== limit) {
@@ -26,7 +26,9 @@ const messageReactionAdd = async (client: Client, reaction: MessageReaction, use
     descArr[i - 1] = votes.toString();
 
     embed.setDescription(descArr.join(""));
-    reaction.message.edit({ embeds: [embed] }).catch(() => {});
+    reaction.message.edit({ embeds: [embed] }).catch((err) => {
+      console.log(err);
+    });
 
     return;
   }
@@ -51,7 +53,8 @@ const messageReactionAdd = async (client: Client, reaction: MessageReaction, use
       finishGame(game, reaction.message.guild, settings);
     })
     .catch((err) => {
-      const channel = reaction.message.guild?.channels.cache.get(game.textChannel);
+      if (!reaction.message.guild) return;
+      const channel = reaction.message.guild.channels.cache.get(game.textChannel);
       if (channel && channel.isText()) {
         channel.send("Error voiding game!").catch(() => {});
         console.log(err);

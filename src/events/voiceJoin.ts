@@ -112,6 +112,7 @@ const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceSt
 
       const embed = new MessageEmbed();
       embed.setTitle(`Game #${gameCount} - Picking Teams`);
+      embed.setColor("#a36bed");
       embed.addField("Team 1", `Captain: <@${cap1.discordId}>`);
       embed.addField("Team 2", `Captain: <@${cap2.discordId}>`);
       embed.addField("Remaining", remainingStr);

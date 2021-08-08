@@ -44,6 +44,7 @@ const run: RunCallback = async (client, message, args, settings) => {
   } else {
     const embed = new MessageEmbed();
     embed.setTitle(`Scoring Request - Game #${game.gameId}`);
+    embed.setColor("#a36bed");
     embed.addField("Team 1", `Captain: <@${game.team1[0]}>\nPlayers: ${mentionsStr(game.team1.slice(1), "\n")}`);
     embed.addField("Team 2", `Captain: <@${game.team2[0]}>\nPlayers: ${mentionsStr(game.team2.slice(1), "\n")}`);
     embed.setImage(url);

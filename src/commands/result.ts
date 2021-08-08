@@ -99,6 +99,7 @@ const run: RunCallback = async (client, message, args, settings) => {
 
   const embed = new MessageEmbed();
   embed.setTitle(`Game #${game.gameId} - Scored`);
+  embed.setColor("#a36bed");
   embed.setDescription(`Winner: Team ${game.winningTeam === 1 ? "1" : "2"}\nMVP${game.mvps.length === 1 ? "" : "s"}: ${mentionsStr(game.mvps, " ")}`);
   embed.addField("Team 1", team1Str.slice(0, -1));
   embed.addField("Team 2", team2Str.slice(0, -1));

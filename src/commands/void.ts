@@ -24,6 +24,7 @@ const run: RunCallback = async (client, message, args, settings) => {
 
   const embed = new MessageEmbed();
   embed.setTitle("Void Request");
+  embed.setColor("#a36bed");
   embed.setDescription(`React to this message to agree to cancel the game.\`0/${votesNeeded}\` people have voted.`);
 
   message.channel.send({ embeds: [embed] }).then((msg) => {

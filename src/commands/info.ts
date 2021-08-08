@@ -61,6 +61,7 @@ const run: RunCallback = async (client, message, args, settings) => {
 
   const embed = new MessageEmbed();
   embed.setTitle(`Player Info - ${Util.escapeMarkdown(player.name)}`);
+  embed.setColor("#a36bed");
   embed.setDescription(`[${elo}] ${player.name}\n\nPosition: **#${i + 1}**`);
   embed.addField("Player Stats", msg, true);
   embed.addField("Recent Games", gamesMsg, true);

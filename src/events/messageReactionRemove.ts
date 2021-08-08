@@ -1,11 +1,14 @@
 import Client from "../structures/Client";
 import { MessageReaction, User } from "discord.js";
 import Event from "../structures/Event";
+import Game, { GameState } from "../schemas/Game";
 
 const messageReactionRemove = async (client: Client, reaction: MessageReaction, user: User) => {
-  if (reaction.me) return;
-  if (!reaction.count) return; // if this is 0, it should also exit
-  if (client.user?.id && !reaction.users.cache.has(client.user.id)) return;
+  if (!reaction.me || !reaction.count) return;
+  if (user?.bot) return;
+
+  const game = await Game.findOne({ textChannel: reaction.message.channel.id });
+  if (!game || game.state === GameState.FINISHED || !game.players.includes(user.id)) return;
 
   const votes = reaction.count - 1;
 

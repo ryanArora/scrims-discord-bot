@@ -26,6 +26,7 @@ const run: RunCallback = async (client, message, args, settings) => {
 
   const embed = new MessageEmbed();
   embed.setTitle("ELO Ranks");
+  embed.setColor("#a36bed");
   embed.setDescription(msg);
 
   message.channel.send({ embeds: [embed] });
