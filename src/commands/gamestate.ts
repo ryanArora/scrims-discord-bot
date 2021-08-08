@@ -10,21 +10,13 @@ const run: RunCallback = async (client, message, args, settings) => {
     return;
   }
 
-  let gameId: number | null = null;
-
-  try {
-    gameId = parseInt(args[0] as string, 10);
-  } catch (e) {
-    gameId = null;
-  }
+  let gameId = parseInt(args[0] as string, 10);
 
   let game: IGame | null = null;
-  if (gameId) {
-    const g = await Game.findOne({ gameId });
-    if (g) game = g;
+  if (!isNaN(gameId)) {
+    game = await Game.findOne({ gameId });
   } else {
-    const g = await Game.findOne({ textChannel: message.channel.id });
-    if (g) game = g;
+    game = await Game.findOne({ textChannel: message.channel.id });
   }
 
   if (!game) {
