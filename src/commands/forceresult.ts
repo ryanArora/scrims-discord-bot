@@ -83,7 +83,7 @@ const run: RunCallback = async (client, message, args, settings) => {
 
     if (!player.games.includes(gameId)) player.games.push(gameId);
     player.games = removeDuplicates(player.games);
-    player.games.sort((a, b) => a - b);
+    player.games.sort();
 
     for (const gameId of player.games) {
       const game = games.find((g) => g.gameId === gameId);

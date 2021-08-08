@@ -73,6 +73,7 @@ const run: RunCallback = async (client, message, args, settings) => {
 
     const oldElo = player.elo;
     player = getNewPlayerStats(player, game);
+    player.games.push(game.gameId);
 
     await player.save().catch((err) => {
       message.channel.send(`Unable to edit <@${discordId}>'s stats for Game #${game.gameId}`);
@@ -81,7 +82,6 @@ const run: RunCallback = async (client, message, args, settings) => {
 
     const member = message.guild.members.cache.get(player.discordId);
     if (member) updateMember(member, player.name, player.elo, oldElo, settings.rankRoles);
-    player.games.push(game.gameId);
 
     const isTeam1 = game.team1.includes(player.discordId);
     if (isTeam1) {
