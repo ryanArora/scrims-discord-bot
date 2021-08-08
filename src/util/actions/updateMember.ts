@@ -1,8 +1,7 @@
-import { GuildMember, Role } from "discord.js";
-import { IPlayer } from "../../schemas/Player";
+import { GuildMember, Snowflake } from "discord.js";
 import { rankFromElo } from "../elo";
 
-const updateMember = (member: GuildMember, name: IPlayer["name"], elo: IPlayer["elo"], oldElo: IPlayer["elo"], rankRoles: Role["id"][]) => {
+const updateMember = (member: GuildMember, name: string, elo: number, oldElo: number, rankRoles: Snowflake[]) => {
   member.setNickname(`[${elo}] ${name}`).catch(() => {});
 
   const rank = rankFromElo(elo);

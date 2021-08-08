@@ -67,7 +67,7 @@ const run: RunCallback = async (client, message, args, settings) => {
   embed.setTimestamp();
   embed.setFooter(`Requested by ${message.author.tag}`);
 
-  message.channel.send({ embed });
+  message.channel.send({ embeds: [embed] });
 };
 
 const InfoCommand: Command = {

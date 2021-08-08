@@ -1,6 +1,6 @@
 import Command, { RunCallback } from "../structures/Command";
 import { MessageEmbed } from "discord.js";
-import Game, { EGameState } from "../schemas/Game";
+import Game, { GameState } from "../schemas/Game";
 import mentionsStr from "../util/str/mentionsStr";
 import getLastUrlRoute from "../util/getLastUrlRoute";
 import getFileExtension from "../util/getFileExtension";
@@ -15,10 +15,10 @@ const run: RunCallback = async (client, message, args, settings) => {
     return;
   }
 
-  if (game.state === EGameState.PICKING) {
+  if (game.state === GameState.PICKING) {
     message.channel.send("You can't score the game before the teams have been picked!").catch(() => {});
     return;
-  } else if (game.state === EGameState.FINISHED) {
+  } else if (game.state === GameState.FINISHED) {
     let msg = "The game has already been ";
     if (game.voided) {
       msg += "voided!";
@@ -49,8 +49,8 @@ const run: RunCallback = async (client, message, args, settings) => {
     embed.setImage(url);
 
     if (scoringChannel.isText())
-      scoringChannel.send({ embed }).then(() => {
-        game.state = EGameState.SCORING;
+      scoringChannel.send({ embeds: [embed] }).then(() => {
+        game.state = GameState.SCORING;
         game.save().catch(() => {
           message.channel.send("Error saving game!").catch(() => {});
         });

@@ -114,7 +114,7 @@ const run: RunCallback = async (client, message, args, settings) => {
   embed.setFooter(`Page ${page}`);
   embed.setTimestamp();
 
-  message.channel.send({ embed }).catch(() => {});
+  message.channel.send({ embeds: [embed] });
 };
 
 const LeaderboardCommand: Command = {

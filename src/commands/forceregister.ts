@@ -23,7 +23,7 @@ const run: RunCallback = async (client, message, args, settings) => {
   let member: GuildMember | null = null;
 
   if (user) {
-    member = message.guild!.member(user);
+    member = await message.guild.members.fetch(user);
   } else {
     member = message.member;
   }
@@ -61,10 +61,7 @@ const run: RunCallback = async (client, message, args, settings) => {
       const rankRoleId = settings.rankRoles[Rank.STONE];
       if (rankRoleId) {
         const stoneRole = message.guild.roles.cache.get(rankRoleId);
-        if (stoneRole) {
-          console.log("STone role");
-          member.roles.add(stoneRole).catch(() => {});
-        }
+        if (stoneRole) member.roles.add(stoneRole).catch(() => {});
       }
     })
     .catch(() => {

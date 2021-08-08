@@ -1,6 +1,6 @@
 import Command, { RunCallback } from "../structures/Command";
 import { MessageEmbed } from "discord.js";
-import Game, { EGameState } from "../schemas/Game";
+import Game, { GameState } from "../schemas/Game";
 import finishGame from "../util/actions/finishGame";
 import canScore from "../util/canScore";
 
@@ -19,7 +19,7 @@ const run: RunCallback = async (client, message, args, settings) => {
     return;
   }
 
-  if (game.state === EGameState.FINISHED) {
+  if (game.state === GameState.FINISHED) {
     let msg = "You can't void a game after a scoring request!";
     if (game.voided) msg = "The game has already been voided!";
 
@@ -27,7 +27,7 @@ const run: RunCallback = async (client, message, args, settings) => {
     return;
   }
 
-  game.state = EGameState.FINISHED;
+  game.state = GameState.FINISHED;
   game.voided = true;
 
   game
@@ -37,7 +37,7 @@ const run: RunCallback = async (client, message, args, settings) => {
       embed.setTitle(`Game #${game.gameId} - Force Void`);
       embed.setDescription("The game has been voided by force!");
 
-      message.channel.send({ embed }).catch(() => {});
+      message.channel.send({ embeds: [embed] });
 
       if (!message.guild) return;
       finishGame(game, message.guild, settings);

@@ -21,7 +21,7 @@ const messageReactionRemove = async (client: Client, reaction: MessageReaction, 
   descArr[i - 1] = votes.toString();
 
   embed.setDescription(descArr.join(""));
-  reaction.message.edit({ embed }).catch(() => {});
+  reaction.message.edit({ embeds: [embed] }).catch(() => {});
 };
 
 const MessageReactionRemoveEvent: Event = {

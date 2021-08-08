@@ -1,6 +1,6 @@
 import Command, { RunCallback } from "../structures/Command";
 import { MessageEmbed } from "discord.js";
-import Game, { EGameState } from "../schemas/Game";
+import Game, { GameState } from "../schemas/Game";
 
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !settings) return;
@@ -12,7 +12,7 @@ const run: RunCallback = async (client, message, args, settings) => {
     return;
   }
 
-  if (game.state === EGameState.FINISHED) {
+  if (game.state === GameState.FINISHED) {
     let msg = "You can't void a game after a scoring request!";
     if (game.voided) msg = "The game has already been voided!";
 
@@ -26,7 +26,7 @@ const run: RunCallback = async (client, message, args, settings) => {
   embed.setTitle("Void Request");
   embed.setDescription(`React to this message to agree to cancel the game.\`0/${votesNeeded}\` people have voted.`);
 
-  message.channel.send({ embed }).then((msg) => {
+  message.channel.send({ embeds: [embed] }).then((msg) => {
     msg.react("✔️");
   });
 };

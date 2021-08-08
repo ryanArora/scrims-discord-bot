@@ -1,5 +1,5 @@
 import { MessageEmbed } from "discord.js";
-import Game, { EGameState } from "../schemas/Game";
+import Game, { GameState } from "../schemas/Game";
 import Player from "../schemas/Player";
 import Command, { RunCallback } from "../structures/Command";
 import getNewPlayerStats from "../util/getNewPlayerStats";
@@ -10,7 +10,7 @@ import mentionsStr from "../util/str/mentionsStr";
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member || !settings) return;
 
-  if (!message.member.hasPermission("ADMINISTRATOR")) {
+  if (!message.member.permissions.has("ADMINISTRATOR")) {
     message.channel.send("You need to be an admin to do that!");
     return;
   }
@@ -51,7 +51,7 @@ const run: RunCallback = async (client, message, args, settings) => {
     return;
   }
 
-  game.state = EGameState.FINISHED;
+  game.state = GameState.FINISHED;
   game.mvps = mvps;
   game.winningTeam = winningTeam;
 
@@ -119,7 +119,7 @@ const run: RunCallback = async (client, message, args, settings) => {
   embed.addField("Team 1", team1Str.slice(0, -1));
   embed.addField("Team 2", team2Str.slice(0, -1));
 
-  text.send(mentionsStr(game.players, " "), { embed });
+  text.send({ content: mentionsStr(game.players, " "), embeds: [embed] });
 };
 
 const ForceResultCommand: Command = {

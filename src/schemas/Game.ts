@@ -1,7 +1,7 @@
 import { Schema, model, Document } from "mongoose";
-import { GuildMember, TextChannel, VoiceChannel } from "discord.js";
+import { Snowflake } from "discord.js";
 
-export enum EGameState {
+export enum GameState {
   PICKING,
   PLAYING,
   SCORING,
@@ -10,33 +10,33 @@ export enum EGameState {
 
 export interface IGame extends Document {
   gameId: number;
-  players: GuildMember["id"][];
-  textChannel: TextChannel["id"];
-  teamPickingVoiceChannel: VoiceChannel["id"];
-  team1VoiceChannel: VoiceChannel["id"];
-  team2VoiceChannel: VoiceChannel["id"];
-  team1: GuildMember["id"][];
-  team2: GuildMember["id"][];
+  players: Snowflake[];
+  textChannel: Snowflake;
+  teamPickingVoiceChannel: Snowflake;
+  team1VoiceChannel: Snowflake;
+  team2VoiceChannel: Snowflake;
+  team1: Snowflake[];
+  team2: Snowflake[];
   pickNumber: number;
-  state: EGameState;
+  state: GameState;
   voided: boolean;
-  mvps: string[];
+  mvps: Snowflake[];
   winningTeam: number;
 }
 
 const GameSchema = new Schema({
   gameId: { type: Number, requried: true, index: true, unique: true },
-  players: { type: [String] },
+  players: [String],
   textChannel: { type: String, index: true },
-  teamPickingVoiceChannel: { type: String },
-  team1VoiceChannel: { type: String },
-  team2VoiceChannel: { type: String },
-  team1: { type: [String] },
-  team2: { type: [String] },
-  pickNumber: { type: Number },
-  state: { type: Number, enum: Object.values(EGameState) },
-  voided: { type: Boolean },
-  mvps: { type: [String] },
+  teamPickingVoiceChannel: String,
+  team1VoiceChannel: String,
+  team2VoiceChannel: String,
+  team1: [String],
+  team2: [String],
+  pickNumber: Number,
+  state: { type: Number, enum: Object.values(GameState) },
+  voided: Boolean,
+  mvps: [String],
   winningTeam: { type: Number, enum: [1, 2] },
 });
 

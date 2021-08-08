@@ -1,4 +1,4 @@
-import Game, { EGameState } from "../schemas/Game";
+import Game, { GameState } from "../schemas/Game";
 import Command, { RunCallback } from "../structures/Command";
 import { MessageEmbed } from "discord.js";
 import Player from "../schemas/Player";
@@ -40,7 +40,7 @@ const run: RunCallback = async (client, message, args, settings) => {
     return;
   }
 
-  if (game.state !== EGameState.SCORING) {
+  if (game.state !== GameState.SCORING) {
     message.channel.send("That game isn't in the scoring stage!");
     return;
   }
@@ -51,7 +51,7 @@ const run: RunCallback = async (client, message, args, settings) => {
     return;
   }
 
-  game.state = EGameState.FINISHED;
+  game.state = GameState.FINISHED;
   game.mvps = mvps;
   game.winningTeam = winningTeam;
 
@@ -103,7 +103,7 @@ const run: RunCallback = async (client, message, args, settings) => {
   embed.addField("Team 1", team1Str.slice(0, -1));
   embed.addField("Team 2", team2Str.slice(0, -1));
 
-  text.send(mentionsStr(game.players, " "), { embed });
+  text.send({ content: mentionsStr(game.players, " "), embeds: [embed] });
 };
 
 const ResultCommand: Command = {

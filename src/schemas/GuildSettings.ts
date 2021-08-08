@@ -1,34 +1,34 @@
 import { Schema, model, Document } from "mongoose";
-import { TextChannel, Guild, VoiceChannel, Role } from "discord.js";
+import { Snowflake } from "discord.js";
 
 export interface IGuildSettings extends Document {
-  guildId: Guild["id"];
+  guildId: Snowflake;
   hypixelGuildId: string;
-  queueWaiting: VoiceChannel["id"];
-  queue2: VoiceChannel["id"];
-  queue3: VoiceChannel["id"];
-  queue4: VoiceChannel["id"];
-  gamesCategory: TextChannel["id"];
-  scoringRequestsChannel: TextChannel["id"];
-  scoredGamesChannel: TextChannel["id"];
-  scorerRole: Role["id"];
-  registeredRole: Role["id"];
-  rankRoles: Role["id"][];
+  queueWaiting: Snowflake;
+  queue2: Snowflake;
+  queue3: Snowflake;
+  queue4: Snowflake;
+  gamesCategory: Snowflake;
+  scoringRequestsChannel: Snowflake;
+  scoredGamesChannel: Snowflake;
+  scorerRole: Snowflake;
+  registeredRole: Snowflake;
+  rankRoles: Snowflake[];
 }
 
 const GuildSettingsScema = new Schema({
   guildId: { type: String, requried: true, index: true, unique: true },
-  hypixelGuildId: { type: String },
-  queueWaiting: { type: String },
-  queue2: { type: String },
-  queue3: { type: String },
-  queue4: { type: String },
-  gamesCategory: { type: String },
-  scoringRequestsChannel: { type: String },
-  scoredGamesChannel: { type: String },
-  scorerRole: { type: String },
-  registeredRole: { type: String },
-  rankRoles: { type: [String] },
+  hypixelGuildId: String,
+  queueWaiting: String,
+  queue2: String,
+  queue3: String,
+  queue4: String,
+  gamesCategory: String,
+  scoringRequestsChannel: String,
+  scoredGamesChannel: String,
+  scorerRole: String,
+  registeredRole: String,
+  rankRoles: [String],
 });
 
 export default model<IGuildSettings>("GuildSettings", GuildSettingsScema);

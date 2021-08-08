@@ -1,7 +1,7 @@
 import Client from "../structures/Client";
 import { MessageEmbed, OverwriteResolvable, VoiceState } from "discord.js";
 import Event from "../structures/Event";
-import Game, { EGameState } from "../schemas/Game";
+import Game, { GameState } from "../schemas/Game";
 import Player from "../schemas/Player";
 import mentionsStr from "../util/str/mentionsStr";
 import shuffle from "../util/shuffle";
@@ -9,8 +9,8 @@ import shuffle from "../util/shuffle";
 const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceState) => {
   // executed on voicestatechange
 
-  if (oldState.channelID === newState.channelID) return;
-  if (!newState.channelID) return;
+  if (oldState.channelId === newState.channelId) return;
+  if (!newState.channelId) return;
 
   // executed on voice join
 
@@ -67,13 +67,13 @@ const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceSt
 
   for (const id of memberIds) permissionOverwrites.push({ id, allow: ["VIEW_CHANNEL"] });
 
-  const text = await newState.guild.channels.create(`game-#${gameCount}`, { type: "text", parent: settings.gamesCategory, permissionOverwrites });
+  const text = await newState.guild.channels.create(`game-#${gameCount}`, { type: "GUILD_TEXT", parent: settings.gamesCategory, permissionOverwrites });
   if (!text) {
     console.log("Error creating textchannel for game", gameCount);
     return;
   }
 
-  const voice = await newState.guild.channels.create(`Game #${gameCount} - Picking Teams`, { type: "voice", parent: settings.gamesCategory });
+  const voice = await newState.guild.channels.create(`Game #${gameCount} - Picking Teams`, { type: "GUILD_VOICE", parent: settings.gamesCategory });
   if (!voice) {
     console.log("Error creating voicechannel for game", gameCount);
     return;
@@ -126,7 +126,7 @@ const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceSt
         " "
       );
 
-      text.send(msg, { embed }).catch(() => {});
+      text.send({ content: msg, embeds: [embed] });
 
       const game = new Game({
         gameId: gameCount,
@@ -136,7 +136,7 @@ const voiceJoin = async (client: Client, oldState: VoiceState, newState: VoiceSt
         team1: [cap1.discordId], // first captain
         team2: [cap2.discordId], // second captain
         pickNumber: 0,
-        state: EGameState.PICKING,
+        state: GameState.PICKING,
         voided: false,
       });
 

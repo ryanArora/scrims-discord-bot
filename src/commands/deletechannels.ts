@@ -3,7 +3,7 @@ import Command, { RunCallback } from "../structures/Command";
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member) return;
 
-  if (!message.member.hasPermission("ADMINISTRATOR")) {
+  if (!message.member.permissions.has("ADMINISTRATOR")) {
     message.channel.send("You dont have permission to do that");
     return;
   }

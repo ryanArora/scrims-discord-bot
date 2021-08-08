@@ -1,7 +1,7 @@
 import Client from "../structures/Client";
 import { MessageReaction, User } from "discord.js";
 import Event from "../structures/Event";
-import Game, { EGameState } from "../schemas/Game";
+import Game, { GameState } from "../schemas/Game";
 import finishGame from "../util/actions/finishGame";
 import GuildSettings from "../schemas/GuildSettings";
 
@@ -17,7 +17,7 @@ const messageReactionAdd = async (client: Client, reaction: MessageReaction, use
 
   const votes = reaction.count - 1;
   const game = await Game.findOne({ textChannel: reaction.message.channel.id });
-  if (!game || game.state === EGameState.FINISHED) return;
+  if (!game || game.state === GameState.FINISHED) return;
 
   const limit = game.players.length / 2 + 1;
 
@@ -26,19 +26,19 @@ const messageReactionAdd = async (client: Client, reaction: MessageReaction, use
     descArr[i - 1] = votes.toString();
 
     embed.setDescription(descArr.join(""));
-    reaction.message.edit({ embed }).catch(() => {});
+    reaction.message.edit({ embeds: [embed] }).catch(() => {});
 
     return;
   }
 
-  game.state = EGameState.FINISHED;
+  game.state = GameState.FINISHED;
   game.voided = true;
 
   game
     .save()
     .then(async () => {
       embed.setDescription("The game has been voided!");
-      reaction.message.edit({ embed });
+      reaction.message.edit({ embeds: [embed] });
 
       if (!reaction.message.guild) return;
       const settings = await GuildSettings.findOne({ guildId: reaction.message.guild.id });

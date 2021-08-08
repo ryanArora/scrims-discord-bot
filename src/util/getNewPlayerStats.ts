@@ -1,10 +1,10 @@
 import { IPlayer } from "../schemas/Player";
-import { EGameState, IGame } from "../schemas/Game";
+import { GameState, IGame } from "../schemas/Game";
 import { rankFromElo, winEloFromRank, loseEloFromRank, mvpEloFromRank } from "../util/elo";
 
 const getNewPlayerStats = (player: IPlayer, game: IGame) => {
   if (game.voided) return player;
-  if (game.state !== EGameState.FINISHED) return player;
+  if (game.state !== GameState.FINISHED) return player;
 
   const inGame = game.team1.includes(player.discordId) || game.team2.includes(player.discordId);
   if (!inGame) return player;

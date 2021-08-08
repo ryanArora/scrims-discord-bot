@@ -3,7 +3,7 @@ import { Message } from "discord.js";
 import Event from "../structures/Event";
 import { IGuildSettings } from "../schemas/GuildSettings";
 
-const message = async (client: Client, message: Message) => {
+const messageCreate = async (client: Client, message: Message) => {
   if (message.author.bot) return;
   if (!message.content.startsWith(client.prefix)) return;
 
@@ -19,9 +19,9 @@ const message = async (client: Client, message: Message) => {
   }
 };
 
-const MessageEvent: Event = {
-  name: "message",
-  run: message,
+const MessageCreateEvent: Event = {
+  name: "messageCreate",
+  run: messageCreate,
 };
 
-module.exports = MessageEvent;
+module.exports = MessageCreateEvent;

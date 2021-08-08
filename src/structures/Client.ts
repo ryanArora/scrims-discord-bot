@@ -41,7 +41,7 @@ export default class Client extends Discord.Client {
     }
   }
 
-  async getGuildSettings(guildId: string) {
+  async getGuildSettings(guildId: Discord.Snowflake) {
     let settings: IGuildSettings | null = await GuildSettings.findOne({ guildId });
     if (settings === null) {
       settings = new GuildSettings({ guildId });

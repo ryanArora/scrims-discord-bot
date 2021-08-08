@@ -28,7 +28,7 @@ const run: RunCallback = async (client, message, args, settings) => {
   embed.setTitle("ELO Ranks");
   embed.setDescription(msg);
 
-  message.channel.send({ embed });
+  message.channel.send({ embeds: [embed] });
 };
 
 const RanksCommand: Command = {

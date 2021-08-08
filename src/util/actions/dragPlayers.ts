@@ -1,6 +1,6 @@
-import { DMChannel, NewsChannel, TextChannel, VoiceChannel } from "discord.js";
+import { TextBasedChannels, VoiceChannel } from "discord.js";
 
-const dragPlayers = (voice: VoiceChannel, players: string[], channel?: TextChannel | DMChannel | NewsChannel) => {
+const dragPlayers = (voice: VoiceChannel, players: string[], channel?: TextBasedChannels) => {
   return new Promise<string[]>(async (resolve, reject) => {
     const notMoved: string[] = [];
 

@@ -1,5 +1,5 @@
 import Command, { RunCallback } from "../structures/Command";
-import Game, { EGameState } from "../schemas/Game";
+import Game, { GameState } from "../schemas/Game";
 import { MessageEmbed } from "discord.js";
 import mentionsStr from "../util/str/mentionsStr";
 import getPicksAmount from "../util/getPicks";
@@ -15,7 +15,7 @@ const run: RunCallback = async (client, message, args, settings) => {
     return;
   }
 
-  if (game.state !== EGameState.PICKING) {
+  if (game.state !== GameState.PICKING) {
     message.channel.send("The game isn't in the picking phase!");
     return;
   }
@@ -73,25 +73,25 @@ const run: RunCallback = async (client, message, args, settings) => {
     }
 
     message.guild.channels
-      .create(`Game #${game.gameId} - Team 1`, { type: "voice", parent: settings.gamesCategory })
+      .create(`Game #${game.gameId} - Team 1`, { type: "GUILD_VOICE", parent: settings.gamesCategory })
       .then(async (voice) => {
         if (!message.guild) return;
 
         game.team1VoiceChannel = voice.id;
 
         message.guild.channels
-          .create(`Game #${game.gameId} - Team 2`, { type: "voice", parent: settings.gamesCategory })
-          .then(async (voice) => {
+          .create(`Game #${game.gameId} - Team 2`, { type: "GUILD_VOICE", parent: settings.gamesCategory })
+          .then((voice) => {
             if (!message.channel) return;
 
             game.team2VoiceChannel = voice.id;
-            game.state = EGameState.PLAYING;
+            game.state = GameState.PLAYING;
 
             game.save();
 
             dragPlayers(voice, game.team2, message.channel);
           })
-          .catch((err) => {
+          .catch(() => {
             message.channel.send("Error creating team voice channel for team 1");
           });
 
@@ -107,7 +107,7 @@ const run: RunCallback = async (client, message, args, settings) => {
           });
         }, 2000);
       })
-      .catch((err) => {
+      .catch(() => {
         message.channel.send("Error creating team voice channel for team 1");
       });
   }
@@ -128,7 +128,7 @@ const run: RunCallback = async (client, message, args, settings) => {
     game.save();
   }
 
-  message.channel.send(msg, { embed });
+  message.channel.send({ content: msg, embeds: [embed] });
 };
 
 const PickCommand: Command = {

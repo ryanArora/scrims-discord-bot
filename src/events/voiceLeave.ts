@@ -3,8 +3,8 @@ import { VoiceState } from "discord.js";
 import Event from "../structures/Event";
 
 const voiceLeave = async (client: Client, oldState: VoiceState, newState: VoiceState) => {
-  if (oldState.channelID === newState.channelID) return;
-  if (newState.channelID) return;
+  if (oldState.channelId === newState.channelId) return;
+  if (newState.channelId) return;
 
   // executed on voice leave
 };
