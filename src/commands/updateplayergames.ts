@@ -6,7 +6,7 @@ import getNewPlayerStats from "../util/getNewPlayerStats";
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member) return;
 
-  if (!message.member.permissions.has("ADMINISTRATOR")) {
+  if (!client.owners.includes(message.author.id)) {
     message.channel.send("You dont have permission to do that");
     return;
   }
@@ -45,6 +45,24 @@ const run: RunCallback = async (client, message, args, settings) => {
       player.games.push(game.gameId);
     }
   }
+
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i >= players.length) clearInterval(interval);
+
+    const player = players[i];
+    if (!player) return;
+    player
+      .save()
+      .then(() => {
+        console.log("saved player", player.name);
+      })
+      .catch(() => {
+        console.log("error saving player", player.name);
+      });
+
+    ++i;
+  }, 500);
 };
 
 const UpdatePlayerGames: Command = {

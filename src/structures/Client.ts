@@ -8,7 +8,7 @@ import GuildSettings, { IGuildSettings } from "../schemas/GuildSettings";
 export default class Client extends Discord.Client {
   commands = new Discord.Collection<Command["name"], Command>();
   prefix = "=";
-  static developers = ["272172704243908609"];
+  owners = ["272172704243908609"];
 
   constructor(options: Discord.ClientOptions) {
     super(options);
