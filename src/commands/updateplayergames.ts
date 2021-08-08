@@ -2,6 +2,7 @@ import Command, { RunCallback } from "../structures/Command";
 import Game, { GameState } from "../schemas/Game";
 import Player from "../schemas/Player";
 import getNewPlayerStats from "../util/getNewPlayerStats";
+import updateMember from "../util/actions/updateMember";
 
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member) return;
@@ -54,8 +55,14 @@ const run: RunCallback = async (client, message, args, settings) => {
     if (!player) return;
     player
       .save()
-      .then(() => {
+      .then(async () => {
         console.log("saved player", player.name);
+
+        if (!message.guild || !settings) return;
+        const member = await message.guild.members.fetch(player.discordId).catch(console.log);
+        if (!member) return;
+        console.log("updating member", member.user.tag);
+        updateMember(member, player.name, player.elo, 0, settings.rankRoles);
       })
       .catch(() => {
         console.log("error saving player", player.name);
