@@ -57,6 +57,10 @@ const run: RunCallback = async (client, message, args, settings) => {
   } else if (stat === "highestwinstreak" || stat === "highestws" || stat === "wshigh" || stat === "winstreakhigh") {
     players.sort((a, b) => b.winstreakHigh - a.winstreakHigh);
     cute = "Highest Winstreak";
+  } else if (stat === "scores" || stat === "scorer" || stat === "scoredgames") {
+    players = players.filter((p) => p.scores !== undefined);
+    players.sort((a, b) => (b.scores as number) - (a.scores as number));
+    cute = "Scored Games";
   } else {
     players.sort((a, b) => b.elo - a.elo);
     cute = "ELO";
@@ -99,6 +103,8 @@ const run: RunCallback = async (client, message, args, settings) => {
       msg += player.eloHigh;
     } else if (cute === "Highest Winstreak") {
       msg += player.winstreakHigh;
+    } else if (cute === "Scored Games") {
+      msg += player.scores;
     } else {
       msg += player.elo;
     }

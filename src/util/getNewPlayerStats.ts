@@ -20,7 +20,7 @@ const getNewPlayerStats = (player: IPlayer, game: IGame) => {
     player.elo += eloToAdd;
 
     // Increment highest elo
-    if (player.eloHigh <= player.elo) player.eloHigh = oldElo + eloToAdd;
+    if (player.elo >= player.eloHigh) player.eloHigh = oldElo + eloToAdd;
 
     // Increment highest winstreak
     if (player.winstreak >= player.winstreakHigh) player.winstreakHigh = player.winstreak + 1;

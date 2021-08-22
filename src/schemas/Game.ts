@@ -15,6 +15,7 @@ export interface IGame extends Document {
   teamPickingVoiceChannel: Snowflake;
   team1VoiceChannel: Snowflake;
   team2VoiceChannel: Snowflake;
+  scoreRequestMessage?: Snowflake;
   team1: Snowflake[];
   team2: Snowflake[];
   pickNumber: number;
@@ -31,6 +32,7 @@ const GameSchema = new Schema({
   teamPickingVoiceChannel: String,
   team1VoiceChannel: String,
   team2VoiceChannel: String,
+  scoreRequestMessage: String,
   team1: [String],
   team2: [String],
   pickNumber: Number,

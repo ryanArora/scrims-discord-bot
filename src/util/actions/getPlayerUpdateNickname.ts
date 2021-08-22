@@ -18,7 +18,6 @@ const getPlayerUpdateNickname = (member: GuildMember, uuid: string, name: string
             elo: 0,
             wins: 0,
             losses: 0,
-            wlr: 0,
             mvps: 0,
             winstreak: 0,
             losestreak: 0,

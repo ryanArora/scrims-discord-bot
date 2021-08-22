@@ -11,21 +11,12 @@ const run: RunCallback = async (client, message, args, settings) => {
 
   const game = await Game.findOne({ textChannel: message.channel.id });
   if (!game) {
-    message.channel.send("You're not in an active game channel!").catch(() => {});
+    message.channel.send("You're not in an active game channel!");
     return;
   }
 
-  if (game.state === GameState.PICKING) {
-    message.channel.send("You can't score the game before the teams have been picked!").catch(() => {});
-    return;
-  } else if (game.state === GameState.FINISHED) {
-    let msg = "The game has already been ";
-    if (game.voided) {
-      msg += "voided!";
-    } else {
-      msg += "scored!";
-    }
-    message.channel.send(msg).catch(() => {});
+  if (game.state !== GameState.PLAYING) {
+    message.channel.send("You can't score the game right now!");
     return;
   }
 
@@ -34,13 +25,13 @@ const run: RunCallback = async (client, message, args, settings) => {
   const ext = getFileExtension(getLastUrlRoute(url));
 
   if (ext !== "png" && ext !== "jpg" && ext !== "jpeg") {
-    message.channel.send("You have to upload a screenshot as an attachment").catch(() => {});
+    message.channel.send("You have to upload a screenshot as an attachment");
     return;
   }
 
   const scoringChannel = message.guild.channels.cache.get(settings.scoringRequestsChannel);
   if (!scoringChannel) {
-    message.channel.send(`<@${settings.scorerRole}>, failed to get scoring games channel, please score this`).catch(() => {});
+    message.channel.send(`<@${settings.scorerRole}>, failed to get scoring games channel, please score this`);
   } else {
     const embed = new MessageEmbed();
     embed.setTitle(`Scoring Request - Game #${game.gameId}`);
@@ -53,7 +44,7 @@ const run: RunCallback = async (client, message, args, settings) => {
       scoringChannel.send({ embeds: [embed] }).then(() => {
         game.state = GameState.SCORING;
         game.save().catch(() => {
-          message.channel.send("Error saving game!").catch(() => {});
+          message.channel.send("Error saving game!");
         });
       });
   }

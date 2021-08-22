@@ -91,6 +91,13 @@ const run: RunCallback = async (client, message, args, settings) => {
     }
   }
 
+  const scorer = await Player.findOne({ discordId: message.author.id });
+  if (scorer) {
+    if (!scorer.scores) scorer.scores = 1;
+    else scorer.scores++;
+    scorer.save();
+  }
+
   const oldText = message.guild.channels.cache.get(game.textChannel);
   if (oldText) oldText.delete();
 
