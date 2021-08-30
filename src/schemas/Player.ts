@@ -37,7 +37,7 @@ export interface IPlayer extends Document {
 
 const PlayerSchema = new Schema({
   discordId: { type: String, required: true, index: true, unique: true },
-  guildId: { type: String, required: true },
+  guildId: { type: String, required: true, default: "" },
   name: { type: String, requried: true, index: true, unique: true },
   nickname: String,
   uuid: { type: String, requried: true, unique: true },

@@ -22,6 +22,11 @@ const updatePlayerGuilds = async (guild: Guild, settings: IGuildSettings) => {
           player.save().catch((err) => {
             console.log(`Error saving player ${player.uuid} (${player.name})`, err);
           });
+        } else if (player.guildId === undefined) {
+          player.guildId = "";
+          player.save().catch((err) => {
+            console.log(err);
+          });
         }
       }
     }
