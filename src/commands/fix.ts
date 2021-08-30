@@ -23,6 +23,12 @@ const run: RunCallback = async (client, message, args, settings) => {
   }
 
   if (member && player) {
+    if (!member.roles.cache.has(settings.registeredRole)) {
+      member.roles.add(settings.registeredRole).catch((err) => {
+        console.log(`Error adding registered role to ${member.user.tag}`, err);
+      });
+    }
+
     const name = await getName(player.uuid);
     if (name && player.name !== name) {
       player.name = name;
@@ -35,15 +41,11 @@ const run: RunCallback = async (client, message, args, settings) => {
       console.log("Error getting hypixel guild", err);
     });
 
-    if (player.guildId) {
-      if (hypixelGuild) {
-        player.guildId = hypixelGuild.guildId;
-        player.save();
-      }
-    } else {
-      if (hypixelGuild) player.guildId = hypixelGuild.guildId;
-      else player.guildId = "";
-      player.save();
+    if (hypixelGuild) {
+      player.guildId = hypixelGuild.guildId;
+      player.save().catch((err) => {
+        console.log(`Error saving player's hypixel id`, player.name, hypixelGuild.guildId);
+      });
     }
 
     if (!member.roles.cache.has(settings.registeredRole)) member.roles.add(settings.registeredRole).catch(() => {});

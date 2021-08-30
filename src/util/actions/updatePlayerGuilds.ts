@@ -16,18 +16,13 @@ const updatePlayerGuilds = async (guild: Guild, settings: IGuildSettings) => {
   for (const guild of alliedGuilds as HypixelGuild[]) {
     for (const member of guild.members) {
       const player = players.find((p) => p.uuid === member.uuid);
-      if (player) {
-        if (player.guildId !== guild.guildId) {
-          player.guildId = guild.guildId;
-          player.save().catch((err) => {
-            console.log(`Error saving player ${player.uuid} (${player.name})`, err);
-          });
-        } else if (player.guildId === undefined) {
-          player.guildId = "";
-          player.save().catch((err) => {
-            console.log(err);
-          });
-        }
+      if (!player) continue;
+
+      if (player.guildId !== guild.guildId) {
+        player.guildId = guild.guildId;
+        player.save().catch((err) => {
+          console.log(`Error saving player ${player.uuid} (${player.name})`, err);
+        });
       }
     }
   }

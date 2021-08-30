@@ -17,7 +17,7 @@ const bot = new Client({
 bot.registerCommands(path.join(__dirname, "./commands"));
 bot.registerEvents(path.join(__dirname, "./events"));
 
-mongoose.connect(process.env.MONGO_CONNECTION!).then(() => {
+mongoose.connect(process.env.MONGO_CONNECTION!).then(async () => {
   console.log("Connected to database!");
   bot.login(process.env.DISCORD_TOKEN);
 });

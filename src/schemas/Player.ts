@@ -19,7 +19,7 @@ export enum Rank {
 
 export interface IPlayer extends Document {
   discordId: Snowflake;
-  guildId: string;
+  guildId: string | null;
   name: string;
   nickname?: string;
   uuid: string;
@@ -37,7 +37,7 @@ export interface IPlayer extends Document {
 
 const PlayerSchema = new Schema({
   discordId: { type: String, required: true, index: true, unique: true },
-  guildId: { type: String, required: true, default: "" },
+  guildId: { type: String, required: true, default: null },
   name: { type: String, requried: true, index: true, unique: true },
   nickname: String,
   uuid: { type: String, requried: true, unique: true },

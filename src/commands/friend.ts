@@ -23,12 +23,21 @@ const run: RunCallback = async (client, message, args, settings) => {
     return;
   }
 
+  if (settings.alliedPlayers.includes(player.uuid)) {
+    message.channel.send("That player is already a friend!");
+    return;
+  }
+
   settings.alliedPlayers.push(player.uuid);
   settings.save().then(async () => {
     if (message.guild && id) {
       const member = await message.guild.members.fetch(id);
       if (member) {
         member.roles.add(settings.alliedRole).catch(console.log);
+      }
+
+      if (member.roles.cache.has(settings.bannedRole) && !settings.bannedPlayers.includes(player.uuid)) {
+        member.roles.remove(settings.bannedRole).catch(console.log);
       }
     }
 
