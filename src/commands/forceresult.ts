@@ -3,10 +3,10 @@ import Game, { GameState } from "../schemas/Game";
 import Player from "../schemas/Player";
 import Command, { RunCallback } from "../structures/Command";
 import getNewPlayerStats from "../util/getNewPlayerStats";
-import updateMember from "../util/actions/updateMember";
 import eloDifferenceStr from "../util/str/eloDifferenceStr";
 import mentionsStr from "../util/str/mentionsStr";
 import removeDuplicates from "../util/removeDuplicates";
+import playerEloChange from "../util/actions/playerEloChange";
 
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member || !settings) return;
@@ -103,8 +103,8 @@ const run: RunCallback = async (client, message, args, settings) => {
       console.log(err);
     });
 
-    const member = message.guild.members.cache.get(player.discordId);
-    if (member) updateMember(member, player.name, player.elo, oldElo, settings.rankRoles);
+    const member = await message.guild.members.fetch(player.discordId).catch(() => {});
+    if (member) playerEloChange(member, player, settings.rankRoles);
   }
 
   message.channel.send("Changed game result!");

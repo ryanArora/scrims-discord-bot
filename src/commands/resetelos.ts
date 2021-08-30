@@ -1,7 +1,7 @@
 import Command, { RunCallback } from "../structures/Command";
 import Player from "../schemas/Player";
 import mongoose from "mongoose";
-import updateMember from "../util/actions/updateMember";
+import playerEloChange from "../util/actions/playerEloChange";
 
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member || !settings) return;
@@ -38,6 +38,7 @@ const run: RunCallback = async (client, message, args, settings) => {
     p.losestreak = 0;
     p.winstreakHigh = 0;
     p.eloHigh = 0;
+    if (p.scores) p.scores = 0;
     p.games = [];
 
     p.save()
@@ -48,7 +49,7 @@ const run: RunCallback = async (client, message, args, settings) => {
         const member = await message.guild.members.fetch(p.discordId).catch(() => console.log("not updating member because they left the guild"));
         if (!member) return;
         console.log("updating member", member.user.tag);
-        updateMember(member, p.name, p.elo, 0, settings.rankRoles);
+        playerEloChange(member, p, settings.rankRoles);
       })
       .catch(() => {
         console.log("error reseting player", p.name);

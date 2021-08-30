@@ -14,17 +14,10 @@ const bot = new Client({
   partials: ["MESSAGE", "REACTION"],
 });
 
-mongoose
-  .connect(process.env.MONGO_CONNECTION!!, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: true,
-    useCreateIndex: true,
-  })
-  .then(() => {
-    console.log("Connected to database!");
+bot.registerCommands(path.join(__dirname, "./commands"));
+bot.registerEvents(path.join(__dirname, "./events"));
 
-    bot.registerCommands(path.join(__dirname, "./commands"));
-    bot.registerEvents(path.join(__dirname, "./events"));
-    bot.login(process.env.DISCORD_TOKEN);
-  });
+mongoose.connect(process.env.MONGO_CONNECTION!).then(() => {
+  console.log("Connected to database!");
+  bot.login(process.env.DISCORD_TOKEN);
+});

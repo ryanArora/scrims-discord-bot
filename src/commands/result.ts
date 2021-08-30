@@ -4,9 +4,9 @@ import { MessageEmbed } from "discord.js";
 import Player from "../schemas/Player";
 import mentionsStr from "../util/str/mentionsStr";
 import canScore from "../util/canScore";
-import updateMember from "../util/actions/updateMember";
 import getNewPlayerStats from "../util/getNewPlayerStats";
 import eloDifferenceStr from "../util/str/eloDifferenceStr";
+import playerEloChange from "../util/actions/playerEloChange";
 
 const run: RunCallback = async (client, message, args, settings) => {
   if (!message.guild || !message.member || !settings) return;
@@ -80,8 +80,8 @@ const run: RunCallback = async (client, message, args, settings) => {
       console.log(err);
     });
 
-    const member = message.guild.members.cache.get(player.discordId);
-    if (member) updateMember(member, player.name, player.elo, oldElo, settings.rankRoles);
+    const member = await message.guild.members.fetch(player.discordId).catch(() => {});
+    if (member) playerEloChange(member, player, settings.rankRoles);
 
     const isTeam1 = game.team1.includes(player.discordId);
     if (isTeam1) {
@@ -91,12 +91,22 @@ const run: RunCallback = async (client, message, args, settings) => {
     }
   }
 
-  const scorer = await Player.findOne({ discordId: message.author.id });
-  if (scorer) {
-    if (!scorer.scores) scorer.scores = 1;
-    else scorer.scores++;
-    scorer.save();
-  }
+  Player.findOne({ discordId: message.author.id })
+    .then((scorer) => {
+      if (scorer) {
+        if (!scorer.scores) scorer.scores = 1;
+        else scorer.scores++;
+
+        scorer.save().catch(() => {
+          console.log(`Error adding score to scorer ${scorer.name}`);
+        });
+      } else {
+        console.log("Scorer not registered", message.author.tag);
+      }
+    })
+    .catch(() => {
+      console.log("Error finding scorer");
+    });
 
   const oldText = message.guild.channels.cache.get(game.textChannel);
   if (oldText) oldText.delete();
